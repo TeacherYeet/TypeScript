@@ -1,0 +1,1307 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TypeScript in 6 weken</title>
+<meta name="description" content="Zelfstandige TypeScript-course voor mbo-4 Software Developer, 6 weken, 2 lesuren per week.">
+<!--
+  DOCENT: pas hieronder (in het <script> onderaan) STARTER_URL aan naar de starter-zip in Canvas.
+  Dit is één bestand zonder externe afhankelijkheden: zet het als index.html in een GitHub Pages-repo (of upload het in Canvas).
+-->
+<style>
+:root {
+  --bg: #f7f8fa;
+  --surface: #ffffff;
+  --surface-2: #f0f3f7;
+  --text: #1c2430;
+  --muted: #5b6676;
+  --border: #dde3ea;
+  --accent: #3178c6;
+  --accent-soft: #e6f0fb;
+  --accent-text: #1f5fa6;
+  --ok: #1f8a4c;
+  --ok-soft: #e5f5ec;
+  --warn: #a86400;
+  --warn-soft: #fdf2e1;
+  --bad: #c0392b;
+  --bad-soft: #fbe9e7;
+  --code-bg: #0f1724;
+  --code-text: #e4e9f0;
+  --code-comment: #8a96a8;
+  --shadow: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.08);
+  --radius: 10px;
+  --sidebar: 268px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117; --surface: #151b24; --surface-2: #1b2330; --text: #e6ebf2; --muted: #9aa6b8;
+    --border: #2a3442; --accent: #5aa2ea; --accent-soft: #16273b; --accent-text: #8cc2f5;
+    --ok: #4cc283; --ok-soft: #123222; --warn: #e3a64a; --warn-soft: #33260f; --bad: #ef7b6e; --bad-soft: #3a1714;
+    --code-bg: #0a0f16; --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117; --surface: #151b24; --surface-2: #1b2330; --text: #e6ebf2; --muted: #9aa6b8;
+  --border: #2a3442; --accent: #5aa2ea; --accent-soft: #16273b; --accent-text: #8cc2f5;
+  --ok: #4cc283; --ok-soft: #123222; --warn: #e3a64a; --warn-soft: #33260f; --bad: #ef7b6e; --bad-soft: #3a1714;
+  --code-bg: #0a0f16; --shadow: none;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+a { color: var(--accent-text); }
+code, pre { font-family: ui-monospace, "Cascadia Code", "Fira Code", Consolas, monospace; }
+:not(pre) > code { background: var(--surface-2); border: 1px solid var(--border); padding: .05em .35em; border-radius: 5px; font-size: .9em; }
+
+/* Layout */
+.topbar { display: none; position: sticky; top: 0; z-index: 20; background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 16px; align-items: center; gap: 12px; }
+.topbar strong { flex: 1; }
+.sidebar {
+  position: fixed; inset: 0 auto 0 0; width: var(--sidebar); background: var(--surface);
+  border-right: 1px solid var(--border); overflow-y: auto; padding: 20px 14px; z-index: 30;
+}
+.brand { display: flex; align-items: center; gap: 10px; padding: 0 8px 16px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+.logo { width: 34px; height: 34px; border-radius: 7px; background: var(--accent); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 15px; letter-spacing: -.5px; }
+.brand b { display: block; line-height: 1.2; }
+.brand small { color: var(--muted); }
+.nav-group { margin: 14px 8px 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.nav a {
+  display: flex; align-items: center; gap: 9px; padding: 8px 8px; border-radius: 8px;
+  text-decoration: none; color: var(--text); font-size: 15px;
+}
+.nav a:hover { background: var(--surface-2); }
+.nav a.active { background: var(--accent-soft); color: var(--accent-text); font-weight: 600; }
+.nav .num { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--border); display: grid; place-items: center; font-size: 12px; flex: none; }
+.nav a.done .num { background: var(--ok); border-color: var(--ok); color: #fff; }
+.nav .bar { margin-left: auto; width: 28px; height: 5px; border-radius: 3px; background: var(--surface-2); overflow: hidden; flex: none; }
+.nav .bar i { display: block; height: 100%; background: var(--ok); width: 0; }
+.side-foot { margin: 20px 8px 0; padding-top: 14px; border-top: 1px solid var(--border); display: flex; gap: 8px; flex-wrap: wrap; }
+.btn {
+  border: 1px solid var(--border); background: var(--surface); color: var(--text); border-radius: 8px;
+  padding: 7px 12px; font: inherit; font-size: 14px; cursor: pointer;
+}
+.btn:hover { background: var(--surface-2); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+main { margin-left: var(--sidebar); padding: 40px 48px 80px; }
+.page { display: none; max-width: 860px; margin: 0 auto; }
+.page.show { display: block; }
+.overlay { display: none; }
+
+@media (max-width: 900px) {
+  .topbar { display: flex; }
+  .sidebar { transform: translateX(-100%); transition: transform .2s; box-shadow: var(--shadow); }
+  body.menu-open .sidebar { transform: none; }
+  body.menu-open .overlay { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 25; }
+  main { margin-left: 0; padding: 24px 16px 64px; }
+}
+
+/* Typografie & blokken */
+.eyebrow { color: var(--accent-text); font-weight: 600; font-size: 14px; letter-spacing: .03em; margin: 0 0 6px; }
+h1 { font-size: 32px; line-height: 1.2; margin: 0 0 10px; letter-spacing: -.01em; }
+h2 { font-size: 22px; margin: 40px 0 12px; padding-top: 8px; }
+h3 { font-size: 18px; margin: 24px 0 8px; }
+.lead { font-size: 18px; color: var(--muted); margin: 0 0 20px; }
+.meta { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 24px; }
+.chip { font-size: 13px; padding: 3px 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow); margin: 14px 0; }
+.card > :first-child { margin-top: 0; }
+.card > :last-child { margin-bottom: 0; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+.note { border-left: 4px solid var(--accent); background: var(--accent-soft); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+.note.warn { border-color: var(--warn); background: var(--warn-soft); }
+.note.ok { border-color: var(--ok); background: var(--ok-soft); }
+.note > :first-child { margin-top: 0; } .note > :last-child { margin-bottom: 0; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 15px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { background: var(--surface-2); font-weight: 600; }
+tr:last-child td { border-bottom: 0; }
+.table-wrap { overflow-x: auto; }
+
+pre {
+  position: relative; background: var(--code-bg); color: var(--code-text); padding: 14px 16px; border-radius: 9px;
+  overflow-x: auto; font-size: 14px; line-height: 1.55; margin: 12px 0;
+}
+pre .c { color: var(--code-comment); }
+pre .k { color: #7cb7ff; }
+pre .s { color: #a5e3a1; }
+pre .t { color: #f3c77a; }
+.copy-btn {
+  position: absolute; top: 8px; right: 8px; font-size: 12px; padding: 3px 8px; border-radius: 6px;
+  border: 1px solid #334155; background: #1e293b; color: #cbd5e1; cursor: pointer; font-family: system-ui, sans-serif;
+}
+.copy-btn:hover { background: #334155; }
+
+/* Opdrachtniveaus */
+.level { border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); margin: 14px 0; overflow: hidden; box-shadow: var(--shadow); }
+.level header { display: flex; align-items: center; gap: 10px; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface-2); flex-wrap: wrap; }
+.level header b { font-size: 16px; }
+.level .body { padding: 6px 18px 16px; }
+.tag { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: .04em; }
+.tag.basis { background: var(--ok-soft); color: var(--ok); }
+.tag.verdieping { background: var(--accent-soft); color: var(--accent-text); }
+.tag.uitdaging { background: var(--warn-soft); color: var(--warn); }
+.level header .cmd { margin-left: auto; font-size: 13px; }
+
+/* Checklist */
+.checklist { list-style: none; padding: 0; margin: 10px 0; }
+.checklist li { margin: 6px 0; }
+.checklist label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); }
+.checklist input { margin-top: 5px; width: 17px; height: 17px; accent-color: var(--ok); flex: none; }
+.checklist input:checked + span { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--muted); }
+.progress { display: flex; align-items: center; gap: 12px; margin: 8px 0 18px; font-size: 14px; color: var(--muted); }
+.progress .track { flex: 1; height: 8px; background: var(--surface-2); border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
+.progress .track i { display: block; height: 100%; width: 0; background: var(--ok); transition: width .25s; }
+
+/* Hints */
+details { border: 1px solid var(--border); border-radius: 9px; background: var(--surface); margin: 8px 0; }
+details summary { cursor: pointer; padding: 10px 14px; font-weight: 600; list-style: none; }
+details summary::-webkit-details-marker { display: none; }
+details summary::before { content: "▸"; display: inline-block; margin-right: 8px; transition: transform .15s; color: var(--muted); }
+details[open] summary::before { transform: rotate(90deg); }
+details .inner { padding: 0 14px 12px; }
+
+/* Quiz */
+.quiz { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; margin: 12px 0; }
+.quiz .q { font-weight: 600; margin: 0 0 10px; }
+.quiz .opts { display: grid; gap: 8px; }
+.quiz button.opt {
+  text-align: left; border: 1px solid var(--border); background: var(--surface); color: var(--text);
+  padding: 9px 12px; border-radius: 8px; font: inherit; font-size: 15px; cursor: pointer;
+}
+.quiz button.opt:hover:not(:disabled) { background: var(--surface-2); }
+.quiz button.opt.right { border-color: var(--ok); background: var(--ok-soft); }
+.quiz button.opt.wrong { border-color: var(--bad); background: var(--bad-soft); }
+.quiz .fb { margin: 10px 0 0; font-size: 15px; display: none; }
+.quiz .fb.show { display: block; }
+
+/* Docs-links */
+.docs { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.docs a { display: block; height: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface); text-decoration: none; color: var(--text); }
+.docs a:hover { border-color: var(--accent); }
+.docs b { display: block; color: var(--accent-text); }
+.docs span { font-size: 14px; color: var(--muted); }
+
+.pager { display: flex; justify-content: space-between; gap: 12px; margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); }
+.pager a { text-decoration: none; padding: 10px 14px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface); color: var(--text); }
+.pager a:hover { border-color: var(--accent); }
+.pager small { display: block; color: var(--muted); }
+.weging { display: flex; height: 44px; border-radius: 9px; overflow: hidden; border: 1px solid var(--border); margin: 14px 0 6px; }
+.weging div { display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; }
+.weging .w-toets { background: var(--accent); }
+.weging .w-eind { background: #7c5cc4; }
+.weging .w-huis { background: var(--ok); }
+.weging .w-houding { background: var(--warn); }
+@media (min-width: 601px) { .weging-tabel td:first-child { white-space: nowrap; } }
+@media (max-width: 600px) { .weging .lbl { display: none; } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .weging div { color: #0d1117; } }
+:root[data-theme="dark"] .weging div { color: #0d1117; }
+.dot { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 8px; vertical-align: -1px; }
+.week-cards a { text-decoration: none; color: inherit; display: block; }
+.week-cards .card { height: 100%; margin: 0; transition: border-color .15s; }
+.week-cards a:hover .card { border-color: var(--accent); }
+.week-cards .card p { color: var(--muted); font-size: 15px; margin: 4px 0 0; }
+@media print { .sidebar, .topbar, .pager, .copy-btn { display: none !important; } main { margin: 0; } .page { display: block !important; } }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <button class="btn" id="menuBtn" aria-label="Menu openen">☰ Menu</button>
+  <strong>TypeScript in 6 weken</strong>
+</div>
+<div class="overlay" id="overlay"></div>
+
+<nav class="sidebar" id="sidebar" aria-label="Hoofdmenu">
+  <div class="brand">
+    <div class="logo">TS</div>
+    <div><b>TypeScript in 6 weken</b><small>mbo-4 Software Developer</small></div>
+  </div>
+  <div class="nav">
+    <a href="#home" data-page="home"><span class="num">⌂</span>Start hier</a>
+    <a href="#setup" data-page="setup"><span class="num">⚙</span>Installatie &amp; inleveren</a>
+    <div class="nav-group">Weken</div>
+    <a href="#week1" data-page="week1"><span class="num">1</span>Basistypes<span class="bar"><i></i></span></a>
+    <a href="#week2" data-page="week2"><span class="num">2</span>Functies &amp; objecten<span class="bar"><i></i></span></a>
+    <a href="#week3" data-page="week3"><span class="num">3</span>Unions &amp; narrowing<span class="bar"><i></i></span></a>
+    <a href="#week4" data-page="week4"><span class="num">4</span>Generics &amp; API<span class="bar"><i></i></span></a>
+    <a href="#week5" data-page="week5"><span class="num">5</span>Classes &amp; OOP<span class="bar"><i></i></span></a>
+    <a href="#week6" data-page="week6"><span class="num">6</span>Eindproject<span class="bar"><i></i></span></a>
+    <div class="nav-group">Hulp</div>
+    <a href="#hulp" data-page="hulp"><span class="num">?</span>Foutmeldingen &amp; hulp</a>
+    <a href="#toets" data-page="toets"><span class="num">✓</span>Theorietoets</a>
+  </div>
+  <div class="side-foot">
+    <button class="btn" id="themeBtn">◐ Thema</button>
+    <button class="btn" id="resetBtn" title="Alle vinkjes wissen">Voortgang wissen</button>
+  </div>
+</nav>
+
+<main>
+
+<!-- ============================ HOME ============================ -->
+<section class="page" id="home">
+  <p class="eyebrow">Zelfstandige course · 6 weken · 2 lesuren per week</p>
+  <h1>TypeScript in 6 weken</h1>
+  <p class="lead">Je leert JavaScript-code veilig maken met types. Elke week werk je zelfstandig een lespakket door, en een test laat meteen zien of je opdracht klopt.</p>
+
+  <div class="grid">
+    <div class="card"><h3>Wat heb je nodig?</h3><p>Je laptop, Node.js en VS Code. Hoe je begint, staat bij <a href="#setup">Installatie &amp; inleveren</a>.</p></div>
+    <div class="card"><h3>Hoe weet je of het goed is?</h3><p>Typ <code>npm test</code>. Je ziet <code>[OK]</code> of <code>[NOG NIET]</code> per onderdeel. Klopt het? Dan lever je je werk in via Canvas.</p></div>
+    <div class="card"><h3>Hoe word je beoordeeld?</h3><p>Je eindcijfer bestaat uit de theorietoets, het eindproject, je huiswerk en je houding. Zie <a href="#cijfer">je eindcijfer</a> hieronder.</p></div>
+  </div>
+
+  <h2 id="cijfer">Je eindcijfer</h2>
+  <p>Je eindcijfer bestaat uit vier delen. De theorietoets telt het zwaarst.</p>
+  <div class="weging" role="img" aria-label="Theorietoets 50%, eindopdracht 20%, huiswerk 20%, houding 10%">
+    <div class="w-toets" style="width:50%"><span class="lbl">Theorietoets&nbsp;</span>50%</div>
+    <div class="w-eind" style="width:20%"><span class="lbl">Eindopdracht&nbsp;</span>20%</div>
+    <div class="w-huis" style="width:20%"><span class="lbl">Huiswerk&nbsp;</span>20%</div>
+    <div class="w-houding" style="width:10%">10%</div>
+  </div>
+  <div class="table-wrap"><table class="weging-tabel">
+    <tr><th>Onderdeel</th><th>Weging</th><th>Wat telt mee</th></tr>
+    <tr><td><span class="dot" style="background:var(--accent)"></span><a href="#toets">Theorietoets</a></td><td><b>50%</b></td><td>35 vragen in Canvas over alle 6 weken.</td></tr>
+    <tr><td><span class="dot" style="background:#7c5cc4"></span><a href="#week6">Eindopdracht</a></td><td><b>20%</b></td><td>Het bibliotheek-systeem uit week 6 met je eigen uitbreiding en de demo, beoordeeld met de rubric.</td></tr>
+    <tr><td><span class="dot" style="background:var(--ok)"></span>Huiswerk</td><td><b>20%</b></td><td>De weekopdrachten van week 1 t/m 5, ingeleverd via Canvas met <code>npm run inleveren:weekN</code>.</td></tr>
+    <tr><td><span class="dot" style="background:var(--warn)"></span>Houding</td><td><b>10%</b></td><td>Inzet in de les, zelfstandig werken, op tijd inleveren en hulp vragen volgens de vastloop-regel.</td></tr>
+  </table></div>
+  <div class="note"><p><b>Rekenvoorbeeld:</b> toets 7,0 · eindopdracht 8,0 · huiswerk 6,0 · houding 7,0<br>
+  0,5 × 7,0 + 0,2 × 8,0 + 0,2 × 6,0 + 0,1 × 7,0 = 3,5 + 1,6 + 1,2 + 0,7 = <b>7,0</b></p></div>
+
+  <h2>Zo werkt elke week</h2>
+  <div class="table-wrap"><table>
+    <tr><th>Stap</th><th>Wat je doet</th></tr>
+    <tr><td>1. Leerdoelen</td><td>Lees wat je aan het eind van de week kunt.</td></tr>
+    <tr><td>2. Uitleg</td><td>Lees de uitleg en probeer de voorbeelden in de <a href="https://www.typescriptlang.org/play" target="_blank" rel="noopener">TS Playground</a>.</td></tr>
+    <tr><td>3. Stappenplan</td><td>Vink de stappen af. Je voortgang wordt in deze browser onthouden.</td></tr>
+    <tr><td>4. Opdracht</td><td><span class="tag basis">Basis</span> is verplicht. <span class="tag verdieping">Verdieping</span> en <span class="tag uitdaging">Uitdaging</span> doe je als je klaar bent.</td></tr>
+    <tr><td>5. Zelfcheck</td><td>Drie korte vragen. Zo oefen je ook voor de theorietoets.</td></tr>
+    <tr><td>6. Inleveren</td><td>Maak je inleverbestand met <code>npm run inleveren:weekN</code> en lever het in bij de opdracht van die week in Canvas.</td></tr>
+    <tr><td>7. Checkpoint</td><td>Laat je docent in de les <code>[OK]</code> zien en leg 1 ding uit in je eigen woorden.</td></tr>
+  </table></div>
+
+  <h2>Vastlopen? Volg deze volgorde</h2>
+  <div class="grid">
+    <div class="card"><h3>1. Zelf (10 min)</h3><p>Lees de foutmelding goed. Bekijk de hints en de pagina <a href="#hulp">Foutmeldingen &amp; hulp</a>.</p></div>
+    <div class="card"><h3>2. Documentatie</h3><p>Elke week heeft onderaan links naar de officiële documentatie van het onderwerp.</p></div>
+    <div class="card"><h3>3. Klasgenoot, dan docent</h3><p>Vraag eerst een klasgenoot. Kom je er samen niet uit? Dan helpt de docent.</p></div>
+  </div>
+  <div class="note warn"><p><b>AI-regel:</b> je mag AI vragen om iets uit te leggen. Maar bij het checkpoint moet jij je code zelf kunnen uitleggen. Kun je dat niet, dan is het checkpoint niet behaald.</p></div>
+
+  <h2>De weken</h2>
+  <div class="grid week-cards">
+    <a href="#week1"><div class="card"><b>Week 1 · Basistypes</b><p>Waarom TypeScript, je eerste types, bug-jacht in een kassasysteem.</p></div></a>
+    <a href="#week2"><div class="card"><b>Week 2 · Functies &amp; objecten</b><p>Interfaces, optionele velden, readonly. Een cijferadministratie.</p></div></a>
+    <a href="#week3"><div class="card"><b>Week 3 · Unions &amp; narrowing</b><p>Arrays, literal types, discriminated unions. Een webshop-mandje.</p></div></a>
+    <a href="#week4"><div class="card"><b>Week 4 · Generics &amp; API</b><p>Modules, async/await, fetch en generics. Data van een API.</p></div></a>
+    <a href="#week5"><div class="card"><b>Week 5 · Classes &amp; OOP</b><p>Classes, private, extends en implements. Een bankrekening.</p></div></a>
+    <a href="#week6"><div class="card"><b>Week 6 · Eindproject</b><p>Alles samen in een bibliotheek-systeem, plus een demo.</p></div></a>
+  </div>
+</section>
+
+<!-- ============================ SETUP ============================ -->
+<section class="page" id="setup">
+  <p class="eyebrow">Eenmalig · ± 15 minuten</p>
+  <h1>Installatie &amp; inleveren</h1>
+  <p class="lead">Je werkt de hele course in één projectmap. Daarin staan al de startbestanden en de tests.</p>
+
+  <div class="progress" data-progress="setup"><span class="label">0/0</span><span class="track"><i></i></span></div>
+  <ol class="checklist" data-week="setup">
+    <li><label><input type="checkbox" data-id="setup-1"><span>Installeer <b>Node.js (LTS)</b> via <a href="https://nodejs.org/en/download" target="_blank" rel="noopener">nodejs.org</a>. Controleer in een terminal met <code>node --version</code> (versie 22 of hoger).</span></label></li>
+    <li><label><input type="checkbox" data-id="setup-2"><span>Installeer <b>VS Code</b> via <a href="https://code.visualstudio.com/" target="_blank" rel="noopener">code.visualstudio.com</a> (als je dat nog niet hebt).</span></label></li>
+    <li><label><input type="checkbox" data-id="setup-3"><span>Download de <a data-starter-link href="#" target="_blank" rel="noopener">starter (zip) uit Canvas</a> en pak hem uit op een vaste plek, bijv. <code>Documenten/ts-course</code>.</span></label></li>
+    <li><label><input type="checkbox" data-id="setup-4"><span>Open de map in VS Code: <b>File → Open Folder</b>.</span></label></li>
+    <li><label><input type="checkbox" data-id="setup-5"><span>Open een terminal (<b>Terminal → New Terminal</b>) en voer <code>npm install</code> uit.</span></label></li>
+    <li><label><input type="checkbox" data-id="setup-6"><span>Voer <code>npm test</code> uit. Je ziet overal <code>[NOG NIET]</code>. Dat klopt: je hebt nog niets gemaakt.</span></label></li>
+    <li><label><input type="checkbox" data-id="setup-7"><span>Tip: zet de map in je eigen <b>GitLab</b>-project. Dan heb je altijd een back-up (zie hieronder).</span></label></li>
+  </ol>
+
+  <h2>Je werk controleren</h2>
+<pre class="copy">npm test                  <span class="c"># alle weken controleren</span>
+npm run test:week1        <span class="c"># alleen week 1</span>
+node check.js week1:basis <span class="c"># alleen de basis van week 1</span></pre>
+
+  <h2>Inleveren via Canvas</h2>
+  <p>Klaar met een week? Maak dan je inleverbestand:</p>
+<pre class="copy">npm run inleveren:week1</pre>
+  <p>Er verschijnt een bestand <code>inlevering-week1.txt</code> in je projectmap. Daarin staan je testuitslag en al je code van die week. Lever <b>dat bestand</b> in bij de opdracht van week 1 in Canvas.</p>
+  <div class="note"><p>Je mag ook inleveren als nog niet alles <code>[OK]</code> is. Je docent ziet dan waar je bent en kan je gericht helpen. Voor een voldoende checkpoint moet <b>basis</b> wel <code>[OK]</code> zijn.</p></div>
+  <div class="note warn"><p>Pas het inleverbestand niet met de hand aan. Je docent kan je code altijd zelf opnieuw testen.</p></div>
+
+  <h2>Back-up in GitLab (aanrader)</h2>
+  <p>Maak in GitLab een leeg project zonder README en voer dan in je projectmap uit:</p>
+<pre class="copy">git init
+git add .
+git commit -m "start TypeScript-course"
+git branch -M main
+git remote add origin LINK-VAN-JE-GITLAB-PROJECT
+git push -u origin main</pre>
+  <p>Daarna elke les:</p>
+<pre class="copy">git add .
+git commit -m "week 1 basis klaar"
+git push</pre>
+
+  <h2>Wat staat er in je projectmap?</h2>
+  <div class="table-wrap"><table>
+    <tr><th>Map / bestand</th><th>Wat is het</th><th>Aanpassen?</th></tr>
+    <tr><td><code>week1/</code> t/m <code>week6/</code></td><td>Startbestanden. In het commentaar bovenaan staat precies wat je moet maken.</td><td>Ja, hier werk je</td></tr>
+    <tr><td><code>tests/</code></td><td>De tests die je werk controleren.</td><td>Nee</td></tr>
+    <tr><td><code>check.js</code></td><td>Het script achter <code>npm test</code> en <code>npm run inleveren</code>.</td><td>Nee</td></tr>
+    <tr><td><code>inlevering-weekN.txt</code></td><td>Je inleverbestand voor Canvas.</td><td>Nee, wordt gemaakt</td></tr>
+  </table></div>
+
+  <h2>Kom je er niet uit?</h2>
+  <ul class="docs">
+    <li><a href="https://code.visualstudio.com/docs/terminal/basics" target="_blank" rel="noopener"><b>De terminal in VS Code</b><span>VS Code Docs</span></a></li>
+    <li><a href="https://code.visualstudio.com/docs/sourcecontrol/overview" target="_blank" rel="noopener"><b>Git gebruiken in VS Code</b><span>VS Code Docs</span></a></li>
+    <li><a href="https://docs.npmjs.com/cli/commands/npm-install" target="_blank" rel="noopener"><b>npm install</b><span>npm Docs</span></a></li>
+    <li><a href="https://git-scm.com/doc" target="_blank" rel="noopener"><b>Git-documentatie</b><span>git-scm.com</span></a></li>
+  </ul>
+</section>
+
+<!-- ============================ WEEK 1 ============================ -->
+<section class="page" id="week1">
+  <p class="eyebrow">Week 1</p>
+  <h1>Waarom TypeScript + je eerste types</h1>
+  <p class="lead">Je ontdekt hoe TypeScript fouten vindt vóórdat je code draait, en je repareert een kassasysteem vol bugs.</p>
+  <div class="meta"><span class="chip">2 lesuren</span><span class="chip">Bestand: week1/kassa.ts</span><span class="chip">Test: npm run test:week1</span></div>
+
+  <h2>Leerdoelen</h2>
+  <ul>
+    <li>Ik kan uitleggen wat TypeScript toevoegt aan JavaScript.</li>
+    <li>Ik gebruik de types <code>string</code>, <code>number</code>, <code>boolean</code>, <code>any</code> en <code>unknown</code>.</li>
+    <li>Ik weet wanneer TypeScript zelf het type raadt (type inference).</li>
+  </ul>
+
+  <h2>Uitleg</h2>
+  <h3>TypeScript = JavaScript + types</h3>
+  <p>TypeScript is gewoon JavaScript, maar je kunt erbij zetten <em>wat voor soort waarde</em> een variabele of parameter is. De TypeScript-compiler (<code>tsc</code>) controleert dat. Daarna haalt hij de types weg en blijft er normale JavaScript over.</p>
+<pre><span class="k">let</span> naam: <span class="t">string</span> = <span class="s">"Sam"</span>;
+<span class="k">let</span> leeftijd: <span class="t">number</span> = <span class="s">17</span>;
+<span class="k">let</span> geslaagd: <span class="t">boolean</span> = <span class="k">true</span>;
+
+leeftijd = <span class="s">"zeventien"</span>; <span class="c">// ❌ Type 'string' is not assignable to type 'number'</span></pre>
+  <h3>Type inference: TypeScript raadt mee</h3>
+  <p>Je hoeft niet overal een type bij te schrijven. Geef je meteen een waarde, dan weet TypeScript het type al.</p>
+<pre><span class="k">let</span> prijs = <span class="s">2.5</span>;   <span class="c">// TypeScript weet: prijs is een number</span>
+prijs = <span class="s">"gratis"</span>;   <span class="c">// ❌ fout</span></pre>
+  <p>Bij <b>parameters van functies</b> kan TypeScript niet raden wat er binnenkomt. Daar schrijf je het type dus wel zelf:</p>
+<pre><span class="k">function</span> verdubbel(x: <span class="t">number</span>): <span class="t">number</span> {
+  <span class="k">return</span> x * <span class="s">2</span>;
+}
+<span class="c">//                  ↑ parameter      ↑ returntype (wat de functie teruggeeft)</span></pre>
+  <h3>any en unknown</h3>
+  <p><code>any</code> zet de controle uit: alles mag, dus TypeScript vangt ook geen fouten meer. <code>unknown</code> betekent "ik weet het nog niet". Dan moet je eerst controleren wat het is voordat je ermee werkt.</p>
+<pre><span class="k">let</span> a: <span class="t">any</span> = <span class="s">"hallo"</span>;
+a.bestaatNiet();          <span class="c">// geen fout van TypeScript, wel een crash als het draait</span>
+
+<span class="k">let</span> b: <span class="t">unknown</span> = <span class="s">"hallo"</span>;
+b.toUpperCase();          <span class="c">// ❌ TypeScript: eerst controleren!</span>
+<span class="k">if</span> (<span class="k">typeof</span> b === <span class="s">"string"</span>) {
+  b.toUpperCase();        <span class="c">// ✅ nu weet TypeScript dat b een string is</span>
+}</pre>
+  <h3>Een interface voor een object</h3>
+  <p>Wil je beschrijven hoe een object eruitziet? Dan gebruik je een <code>interface</code>. Met <code>export</code> kunnen andere bestanden (zoals de tests) hem gebruiken.</p>
+<pre><span class="k">export interface</span> <span class="t">Product</span> {
+  naam: <span class="t">string</span>;
+  prijs: <span class="t">number</span>;
+}</pre>
+  <div class="note"><p><b>strict-modus:</b> in deze course staat de strenge controle van TypeScript altijd aan. Daardoor moet elke parameter een type hebben en mag een functie niet "soms niets" teruggeven.</p></div>
+
+  <h2>Stappenplan</h2>
+  <div class="progress" data-progress="week1"><span class="label">0/0</span><span class="track"><i></i></span></div>
+  <ol class="checklist" data-week="week1">
+    <li><label><input type="checkbox" data-id="w1-1"><span>Zorg dat je <a href="#setup">installatie</a> klaar is.</span></label></li>
+    <li><label><input type="checkbox" data-id="w1-2"><span>Probeer de voorbeelden hierboven in de <a href="https://www.typescriptlang.org/play" target="_blank" rel="noopener">TS Playground</a>. Maak expres een fout en lees de melding.</span></label></li>
+    <li><label><input type="checkbox" data-id="w1-3"><span>Open <code>week1/kassa.ts</code> en lees het commentaar bovenaan.</span></label></li>
+    <li><label><input type="checkbox" data-id="w1-4"><span>Voer <code>npm run test:week1</code> uit en bekijk de lijst met fouten.</span></label></li>
+    <li><label><input type="checkbox" data-id="w1-5"><span>Maak de opdracht Basis tot je <code>[OK] week1:basis</code> ziet.</span></label></li>
+    <li><label><input type="checkbox" data-id="w1-6"><span>Maak je inleverbestand met <code>npm run inleveren:week1</code> en lever het in via Canvas.</span></label></li>
+    <li><label><input type="checkbox" data-id="w1-7"><span>Doe de zelfcheck en laat je checkpoint aftekenen.</span></label></li>
+  </ol>
+
+  <h2>Opdracht: Bug-jacht</h2>
+  <p>In <code>week1/kassa.ts</code> staat een kassasysteem zonder types. Er zitten <b>5 bugs</b> in. Zodra je types toevoegt, wijst TypeScript de meeste bugs zelf aan.</p>
+
+  <div class="level">
+    <header><span class="tag basis">Basis</span><b>Types toevoegen en 5 bugs oplossen</b><code class="cmd">node check.js week1:basis</code></header>
+    <div class="body">
+      <ol>
+        <li>Maak en exporteer <code>interface Product</code> met <code>naam: string</code> en <code>prijs: number</code>.</li>
+        <li>Geef alle parameters en returnwaarden een type. Gebruik <code>Product</code> en <code>Product[]</code> waar het past.</li>
+        <li>Los alle fouten op die TypeScript en de tests laten zien.</li>
+      </ol>
+      <div class="table-wrap"><table>
+        <tr><th>Functie</th><th>Moet doen</th></tr>
+        <tr><td><code>prijsInclBtw(prijs)</code></td><td>Prijs × 1,21 (deze werkt al)</td></tr>
+        <tr><td><code>totaal(prijzen)</code></td><td>Alle prijzen optellen als <b>getal</b></td></tr>
+        <tr><td><code>bonregel(product)</code></td><td>Tekst als <code>"Pen: €1.50"</code></td></tr>
+        <tr><td><code>korting(prijs, procent)</code></td><td>Prijs na korting, ook bij 0 procent</td></tr>
+        <tr><td><code>aantalArtikelen(mandje)</code></td><td>Aantal producten in de lijst</td></tr>
+        <tr><td><code>isGratis(prijs)</code></td><td><code>true</code> als de prijs 0 is</td></tr>
+      </table></div>
+      <div class="note warn"><p>Verander de <b>namen</b> van de functies niet. De tests zoeken precies deze namen.</p></div>
+    </div>
+  </div>
+  <div class="level">
+    <header><span class="tag verdieping">Verdieping</span><b>Geen any, overal een returntype</b><code class="cmd">node check.js week1:verdieping</code></header>
+    <div class="body"><p>Gebruik nergens <code>any</code> in <code>kassa.ts</code>, en geef elke functie een expliciet returntype (<code>): number {</code>).</p></div>
+  </div>
+  <div class="level">
+    <header><span class="tag uitdaging">Uitdaging</span><b>Uitleg in je README</b></header>
+    <div class="body"><p>Schrijf in <code>README.md</code> welke van de 5 bugs gewone JavaScript nooit had gevonden, en waarom. Dit wordt niet getest; je bespreekt het bij het checkpoint.</p></div>
+  </div>
+
+  <h3>Hints</h3>
+  <details><summary>Hint 1: waar begin ik?</summary><div class="inner"><p>Begin bovenaan. Geef elke parameter een type, bijv. <code>prijs: number</code> of <code>product: Product</code>. Draai daarna opnieuw de test: veel fouten worden nu duidelijker.</p></div></details>
+  <details><summary>Hint 2: totaal geeft "0123"?</summary><div class="inner"><p>Kijk met welke waarde <code>som</code> begint. Is dat een getal of een tekst? Wat gebeurt er als je een getal optelt bij een tekst?</p></div></details>
+  <details><summary>Hint 3: korting en isGratis</summary><div class="inner"><p><code>korting</code>: wat geeft de functie terug als <code>procent</code> 0 is? <code>isGratis</code>: wat is het verschil tussen <code>=</code> en <code>===</code>?</p></div></details>
+  <details><summary>Hint 4: TS2339 "Property ... does not exist"</summary><div class="inner"><p>Lees de naam van de property in de foutmelding letter voor letter. Staat er een tikfout in?</p></div></details>
+
+  <h2>Zelfcheck</h2>
+  <div class="quiz" data-answer="b" data-uitleg="De compiler controleert de types en haalt ze daarna weg. In de JavaScript-uitvoer staan geen types meer.">
+    <p class="q">Wat gebeurt er met je types als TypeScript naar JavaScript wordt omgezet?</p>
+    <div class="opts"><button class="opt" data-k="a">Ze worden omgezet naar controles tijdens het draaien</button><button class="opt" data-k="b">Ze worden weggehaald</button><button class="opt" data-k="c">De browser leest ze en controleert ze</button></div><p class="fb"></p>
+  </div>
+  <div class="quiz" data-answer="a" data-uitleg="Bij unknown moet je eerst controleren (bijv. met typeof). any zet de controle helemaal uit.">
+    <p class="q">Wat is het verschil tussen <code>any</code> en <code>unknown</code>?</p>
+    <div class="opts"><button class="opt" data-k="a">Bij unknown moet je eerst controleren wat het is; bij any controleert TypeScript niets</button><button class="opt" data-k="b">any is veiliger dan unknown</button><button class="opt" data-k="c">Er is geen verschil</button></div><p class="fb"></p>
+  </div>
+  <div class="quiz" data-answer="c" data-uitleg="TypeScript raadt uit de eerste waarde (17) dat leeftijd een number is. Een string mag er daarna niet meer in.">
+    <p class="q"><code>let leeftijd = 17; leeftijd = "zeventien";</code> Wat zegt TypeScript?</p>
+    <div class="opts"><button class="opt" data-k="a">Niets, leeftijd is any</button><button class="opt" data-k="b">Niets, de string wordt omgezet naar een getal</button><button class="opt" data-k="c">Fout: 'string' is niet toewijsbaar aan 'number'</button></div><p class="fb"></p>
+  </div>
+
+  <h2>Checkpoint</h2>
+  <div class="note ok"><p>Laat je docent <code>[OK] week1:basis</code> zien en leg uit wat het verschil is tussen <code>any</code> en <code>unknown</code>.</p></div>
+
+  <h2>Kom je er niet uit?</h2>
+  <ul class="docs">
+    <li><a href="https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html" target="_blank" rel="noopener"><b>TypeScript for JavaScript Programmers</b><span>Kort overzicht: wat is TS</span></a></li>
+    <li><a href="https://www.typescriptlang.org/docs/handbook/2/basic-types.html" target="_blank" rel="noopener"><b>The Basics</b><span>Compiler, strict, inference</span></a></li>
+    <li><a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html" target="_blank" rel="noopener"><b>Everyday Types</b><span>string, number, boolean, any</span></a></li>
+    <li><a href="https://www.typescriptlang.org/tsconfig/#strict" target="_blank" rel="noopener"><b>De optie strict</b><span>Wat de strenge modus controleert</span></a></li>
+  </ul>
+</section>
+
+<!-- ============================ WEEK 2 ============================ -->
+<section class="page" id="week2">
+  <p class="eyebrow">Week 2</p>
+  <h1>Functies, objecten en eigen types</h1>
+  <p class="lead">Je beschrijft je eigen data met een interface en bouwt een cijferadministratie.</p>
+  <div class="meta"><span class="chip">2 lesuren</span><span class="chip">Bestand: week2/student.ts</span><span class="chip">Test: npm run test:week2</span></div>
+
+  <h2>Leerdoelen</h2>
+  <ul>
+    <li>Ik geef parameters en returnwaarden van functies een type, ook optionele en default parameters.</li>
+    <li>Ik beschrijf een object met een <code>interface</code> of <code>type</code>, met optionele (<code>?</code>) en <code>readonly</code> velden.</li>
+    <li>Ik kan het verschil tussen <code>type</code> en <code>interface</code> uitleggen.</li>
+  </ul>
+
+  <h2>Uitleg</h2>
+  <h3>Functies met types</h3>
+<pre><span class="k">function</span> groet(naam: <span class="t">string</span>, aanhef: <span class="t">string</span> = <span class="s">"Hoi"</span>): <span class="t">string</span> {
+  <span class="k">return</span> <span class="s">`${aanhef} ${naam}`</span>;
+}
+groet(<span class="s">"Sam"</span>);            <span class="c">// "Hoi Sam"  (aanhef heeft een default)</span>
+
+<span class="k">function</span> log(bericht: <span class="t">string</span>, extra?: <span class="t">string</span>): <span class="t">void</span> {
+  console.log(bericht, extra ?? <span class="s">""</span>);
+}
+<span class="c">// extra? = optioneel. void = de functie geeft niets terug.</span></pre>
+  <h3>Een interface met optionele en readonly velden</h3>
+<pre><span class="k">interface</span> <span class="t">Docent</span> {
+  naam: <span class="t">string</span>;
+  <span class="k">readonly</span> personeelsnummer: <span class="t">number</span>;  <span class="c">// mag na het maken niet meer veranderen</span>
+  vakken: <span class="t">string</span>[];
+  telefoon?: <span class="t">string</span>;                     <span class="c">// optioneel: mag ontbreken</span>
+}
+
+<span class="k">const</span> d: <span class="t">Docent</span> = { naam: <span class="s">"Mo"</span>, personeelsnummer: <span class="s">42</span>, vakken: [<span class="s">"TS"</span>] };
+d.vakken.push(<span class="s">"Python"</span>);   <span class="c">// ✅ mag</span>
+d.personeelsnummer = <span class="s">7</span>;    <span class="c">// ❌ readonly</span></pre>
+  <h3>Functies die een object gebruiken</h3>
+<pre><span class="k">function</span> aantalVakken(docent: <span class="t">Docent</span>): <span class="t">number</span> {
+  <span class="k">return</span> docent.vakken.length;
+}
+
+<span class="k">function</span> voegVakToe(docent: <span class="t">Docent</span>, vak: <span class="t">string</span>): <span class="t">void</span> {
+  docent.vakken.push(vak);   <span class="c">// past de array in het object aan</span>
+}</pre>
+  <h3>type of interface?</h3>
+  <p>Voor objecten mag allebei. Een <code>type</code> kan daarnaast ook andere dingen beschrijven, zoals een keuze tussen waarden (<code>type Id = string | number</code>). Afspraak in deze course: <b>interface voor objecten, type voor de rest</b>.</p>
+
+  <h2>Stappenplan</h2>
+  <div class="progress" data-progress="week2"><span class="label">0/0</span><span class="track"><i></i></span></div>
+  <ol class="checklist" data-week="week2">
+    <li><label><input type="checkbox" data-id="w2-1"><span>Lees de uitleg en probeer het Docent-voorbeeld in de Playground.</span></label></li>
+    <li><label><input type="checkbox" data-id="w2-2"><span>Open <code>week2/student.ts</code> en lees welke namen je moet gebruiken.</span></label></li>
+    <li><label><input type="checkbox" data-id="w2-3"><span>Maak de <code>interface Student</code> en exporteer hem.</span></label></li>
+    <li><label><input type="checkbox" data-id="w2-4"><span>Maak de drie functies. Test tussendoor met <code>node check.js week2:basis</code>.</span></label></li>
+    <li><label><input type="checkbox" data-id="w2-5"><span>Maak je inleverbestand met <code>npm run inleveren:week2</code> en lever het in via Canvas.</span></label></li>
+    <li><label><input type="checkbox" data-id="w2-6"><span>Zelfcheck en checkpoint.</span></label></li>
+  </ol>
+
+  <h2>Opdracht: Cijferadministratie</h2>
+  <div class="level">
+    <header><span class="tag basis">Basis</span><b>Student en drie functies</b><code class="cmd">node check.js week2:basis</code></header>
+    <div class="body">
+<pre><span class="k">export interface</span> <span class="t">Student</span> {
+  naam: <span class="t">string</span>;
+  studentnummer: <span class="t">number</span>;
+  klas: <span class="t">string</span>;
+  cijfers: <span class="t">number</span>[];
+}</pre>
+      <div class="table-wrap"><table>
+        <tr><th>Functie</th><th>Moet doen</th></tr>
+        <tr><td><code>voegCijferToe(student: Student, cijfer: number): void</code></td><td>Zet het cijfer achteraan in <code>student.cijfers</code></td></tr>
+        <tr><td><code>gemiddelde(student: Student): number</code></td><td>Gemiddelde van de cijfers; <b>0</b> als er geen cijfers zijn</td></tr>
+        <tr><td><code>isGeslaagd(student: Student): boolean</code></td><td><code>true</code> als het gemiddelde 5,5 of hoger is (zonder cijfers: <code>false</code>)</td></tr>
+      </table></div>
+    </div>
+  </div>
+  <div class="level">
+    <header><span class="tag verdieping">Verdieping</span><b>Optioneel en readonly</b><code class="cmd">node check.js week2:verdieping</code></header>
+    <div class="body"><p>Voeg een optioneel veld <code>email</code> (string) toe en maak <code>studentnummer</code> <code>readonly</code>. De test controleert dat het studentnummer na het maken niet meer te wijzigen is.</p></div>
+  </div>
+  <div class="level">
+    <header><span class="tag uitdaging">Uitdaging</span><b>Cijfers per vak</b></header>
+    <div class="body"><p>Maak een <code>type Vak</code> en sla cijfers per vak op. Schrijf een functie die per vak het hoogste cijfer teruggeeft. Niet getest.</p></div>
+  </div>
+
+  <h3>Hints</h3>
+  <details><summary>Hint 1: het gemiddelde berekenen</summary><div class="inner"><p>Tel eerst alle cijfers op (met een <code>for</code>-lus of <code>reduce</code>) en deel door het aantal. Wat gebeurt er als je door 0 deelt? Vang dat geval eerst af.</p></div></details>
+  <details><summary>Hint 2: isGeslaagd</summary><div class="inner"><p>Je kunt je eigen functie <code>gemiddelde</code> hergebruiken. Je hoeft het niet opnieuw uit te rekenen.</p></div></details>
+  <details><summary>Hint 3: TS2741 "Property ... is missing"</summary><div class="inner"><p>Je object mist een verplicht veld. Vergelijk de velden van je interface met de lijst hierboven, ook de spelling.</p></div></details>
+
+  <h2>Zelfcheck</h2>
+  <div class="quiz" data-answer="a" data-uitleg="Een vraagteken achter de naam maakt de parameter optioneel. Het type wordt dan string | undefined.">
+    <p class="q">Hoe maak je de parameter <code>naam</code> optioneel?</p>
+    <div class="opts"><button class="opt" data-k="a"><code>function f(naam?: string)</code></button><button class="opt" data-k="b"><code>function f(naam: string?)</code></button><button class="opt" data-k="c"><code>function f(optional naam: string)</code></button></div><p class="fb"></p>
+  </div>
+  <div class="quiz" data-answer="b" data-uitleg="Een functie die niets teruggeeft, heeft returntype void.">
+    <p class="q">Welk returntype heeft een functie die alleen <code>console.log</code> doet en niets teruggeeft?</p>
+    <div class="opts"><button class="opt" data-k="a">string</button><button class="opt" data-k="b">void</button><button class="opt" data-k="c">any</button></div><p class="fb"></p>
+  </div>
+  <div class="quiz" data-answer="c" data-uitleg="Alleen een type alias kan direct een union zijn. Voor objecten kunnen ze allebei.">
+    <p class="q">Wat kan <code>type</code> wél en <code>interface</code> niet?</p>
+    <div class="opts"><button class="opt" data-k="a">Een object beschrijven</button><button class="opt" data-k="b">Optionele velden maken</button><button class="opt" data-k="c">Een union beschrijven, zoals <code>string | number</code></button></div><p class="fb"></p>
+  </div>
+
+  <h2>Checkpoint</h2>
+  <div class="note ok"><p>Laat <code>[OK] week2:basis</code> zien. Roep <code>isGeslaagd</code> aan met een verkeerd object en leg de foutmelding uit.</p></div>
+
+  <h2>Kom je er niet uit?</h2>
+  <ul class="docs">
+    <li><a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#functions" target="_blank" rel="noopener"><b>Everyday Types: Functions</b><span>Parameters en returntypes</span></a></li>
+    <li><a href="https://www.typescriptlang.org/docs/handbook/2/functions.html" target="_blank" rel="noopener"><b>More on Functions</b><span>Optionele en default parameters, void</span></a></li>
+    <li><a href="https://www.typescriptlang.org/docs/handbook/2/objects.html" target="_blank" rel="noopener"><b>Object Types</b><span>Interfaces, optionele velden, readonly</span></a></li>
+    <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce" target="_blank" rel="noopener"><b>Array.reduce</b><span>MDN: optellen van een lijst</span></a></li>
+  </ul>
+</section>
+
+<!-- ============================ WEEK 3 ============================ -->
+<section class="page" id="week3">
+  <p class="eyebrow">Week 3</p>
+  <h1>Arrays, union types en narrowing</h1>
+  <p class="lead">Je modelleert data die meerdere vormen kan hebben, zoals de status van een bestelling of een betaalmethode.</p>
+  <div class="meta"><span class="chip">2 lesuren</span><span class="chip">Bestand: week3/winkelmandje.ts</span><span class="chip">Test: npm run test:week3</span></div>
+
+  <h2>Leerdoelen</h2>
+  <ul>
+    <li>Ik type arrays (<code>Product[]</code>).</li>
+    <li>Ik gebruik union types (<code>string | number</code>) en literal types (<code>"open" | "betaald"</code>).</li>
+    <li>Ik maak een type smaller met <code>typeof</code>, <code>in</code> en een discriminated union (narrowing).</li>
+  </ul>
+
+  <h2>Uitleg</h2>
+  <h3>Union en literal types</h3>
+<pre><span class="k">let</span> id: <span class="t">string</span> | <span class="t">number</span>;      <span class="c">// óf een string, óf een number</span>
+id = <span class="s">"A12"</span>;  <span class="c">// ✅</span>
+id = <span class="s">12</span>;     <span class="c">// ✅</span>
+
+<span class="k">type</span> <span class="t">Lampje</span> = <span class="s">"rood"</span> | <span class="s">"oranje"</span> | <span class="s">"groen"</span>;   <span class="c">// alleen deze drie teksten</span>
+<span class="k">let</span> l: <span class="t">Lampje</span> = <span class="s">"blauw"</span>;   <span class="c">// ❌ fout</span></pre>
+  <h3>Narrowing: het type smaller maken</h3>
+  <p>Bij een union weet TypeScript niet welke van de twee het is. Met een controle maak je het type smaller:</p>
+<pre><span class="k">function</span> toon(id: <span class="t">string</span> | <span class="t">number</span>): <span class="t">string</span> {
+  <span class="k">if</span> (<span class="k">typeof</span> id === <span class="s">"number"</span>) {
+    <span class="k">return</span> id.toFixed(<span class="s">0</span>);      <span class="c">// hier is id een number</span>
+  }
+  <span class="k">return</span> id.toUpperCase();     <span class="c">// hier is id een string</span>
+}</pre>
+  <h3>Discriminated union</h3>
+  <p>Objecten met verschillende velden geef je één gezamenlijk veld met een vaste tekst, bijvoorbeeld <code>soort</code>. Aan dat veld ziet TypeScript welke variant het is.</p>
+<pre><span class="k">type</span> <span class="t">Bezorging</span> =
+  | { soort: <span class="s">"thuis"</span>; adres: <span class="t">string</span> }
+  | { soort: <span class="s">"afhaalpunt"</span>; puntNaam: <span class="t">string</span> };
+
+<span class="k">function</span> label(b: <span class="t">Bezorging</span>): <span class="t">string</span> {
+  <span class="k">switch</span> (b.soort) {
+    <span class="k">case</span> <span class="s">"thuis"</span>:      <span class="k">return</span> <span class="s">`Naar ${b.adres}`</span>;      <span class="c">// b.adres bestaat hier</span>
+    <span class="k">case</span> <span class="s">"afhaalpunt"</span>: <span class="k">return</span> <span class="s">`Ophalen bij ${b.puntNaam}`</span>;
+  }
+}</pre>
+  <h3>Een nieuwe array maken in plaats van aanpassen</h3>
+  <p>Later (bijvoorbeeld in React of bij undo-functies) is het belangrijk dat je de originele array niet verandert. Maak liever een nieuwe:</p>
+<pre><span class="k">const</span> lijst = [<span class="s">1</span>, <span class="s">2</span>];
+<span class="k">const</span> erbij  = [...lijst, <span class="s">3</span>];               <span class="c">// [1, 2, 3]  lijst blijft [1, 2]</span>
+<span class="k">const</span> zonder = lijst.filter((x) => x !== <span class="s">1</span>);  <span class="c">// [2]        lijst blijft [1, 2]</span></pre>
+
+  <h2>Stappenplan</h2>
+  <div class="progress" data-progress="week3"><span class="label">0/0</span><span class="track"><i></i></span></div>
+  <ol class="checklist" data-week="week3">
+    <li><label><input type="checkbox" data-id="w3-1"><span>Lees de uitleg. Probeer in de Playground: wat gebeurt er als je in de <code>switch</code> een <code>case</code> weghaalt?</span></label></li>
+    <li><label><input type="checkbox" data-id="w3-2"><span>Open <code>week3/winkelmandje.ts</code> en lees de namen.</span></label></li>
+    <li><label><input type="checkbox" data-id="w3-3"><span>Maak <code>Product</code> en <code>Status</code>.</span></label></li>
+    <li><label><input type="checkbox" data-id="w3-4"><span>Maak <code>voegToe</code>, <code>verwijder</code> en <code>totaalPrijs</code> tot de basis groen is.</span></label></li>
+    <li><label><input type="checkbox" data-id="w3-5"><span>Maak je inleverbestand met <code>npm run inleveren:week3</code> en lever het in via Canvas.</span></label></li>
+    <li><label><input type="checkbox" data-id="w3-6"><span>Zelfcheck en checkpoint.</span></label></li>
+  </ol>
+
+  <h2>Opdracht: Webshop-winkelmandje</h2>
+  <div class="level">
+    <header><span class="tag basis">Basis</span><b>Product, Status en het mandje</b><code class="cmd">node check.js week3:basis</code></header>
+    <div class="body">
+<pre><span class="k">export type</span> <span class="t">Product</span> = { id: <span class="t">number</span>; naam: <span class="t">string</span>; prijs: <span class="t">number</span> };
+<span class="k">export type</span> <span class="t">Status</span>  = <span class="s">"open"</span> | <span class="s">"betaald"</span> | <span class="s">"verzonden"</span>;</pre>
+      <div class="table-wrap"><table>
+        <tr><th>Functie</th><th>Moet doen</th></tr>
+        <tr><td><code>voegToe(mandje: Product[], product: Product): Product[]</code></td><td><b>Nieuwe</b> array met het product erbij</td></tr>
+        <tr><td><code>verwijder(mandje: Product[], id: number): Product[]</code></td><td><b>Nieuwe</b> array zonder het product met dat id</td></tr>
+        <tr><td><code>totaalPrijs(mandje: Product[]): number</code></td><td>Som van alle prijzen (leeg mandje: 0)</td></tr>
+      </table></div>
+      <div class="note warn"><p>De test controleert dat de originele array <b>niet</b> verandert, en dat <code>Status</code> echt alleen die drie teksten toestaat (dus geen <code>string</code>).</p></div>
+    </div>
+  </div>
+  <div class="level">
+    <header><span class="tag verdieping">Verdieping</span><b>Betaalmethodes</b><code class="cmd">node check.js week3:verdieping</code></header>
+    <div class="body">
+<pre><span class="k">export type</span> <span class="t">Betaling</span> =
+  | { soort: <span class="s">"ideal"</span>; bank: <span class="t">string</span> }
+  | { soort: <span class="s">"creditcard"</span>; laatsteVier: <span class="t">string</span> }
+  | { soort: <span class="s">"cadeaubon"</span>; code: <span class="t">string</span> };</pre>
+      <p>Schrijf <code>betaalTekst(betaling: Betaling): string</code> die <b>precies</b> deze teksten teruggeeft:</p>
+      <div class="table-wrap"><table>
+        <tr><th>Invoer</th><th>Uitvoer</th></tr>
+        <tr><td><code>{ soort: "ideal", bank: "ING" }</code></td><td><code>"iDEAL via ING"</code></td></tr>
+        <tr><td><code>{ soort: "creditcard", laatsteVier: "1234" }</code></td><td><code>"Creditcard eindigend op 1234"</code></td></tr>
+        <tr><td><code>{ soort: "cadeaubon", code: "KADO10" }</code></td><td><code>"Cadeaubon KADO10"</code></td></tr>
+      </table></div>
+    </div>
+  </div>
+  <div class="level">
+    <header><span class="tag uitdaging">Uitdaging</span><b>Nooit een soort vergeten</b></header>
+    <div class="body"><p>Zorg dat TypeScript een fout geeft als er een vierde betaalsoort bijkomt die je nog niet afhandelt. Zoek op: <em>exhaustiveness checking</em> met het type <code>never</code> (zie de link onderaan).</p></div>
+  </div>
+
+  <h3>Hints</h3>
+  <details><summary>Hint 1: een nieuwe array teruggeven</summary><div class="inner"><p>Kijk naar het voorbeeld met <code>...lijst</code> en <code>filter</code> in de uitleg. Gebruik <b>geen</b> <code>push</code> of <code>splice</code>, want die veranderen de originele array.</p></div></details>
+  <details><summary>Hint 2: totaalPrijs</summary><div class="inner"><p>Met <code>reduce</code> tel je een eigenschap van elk object op. Geef als beginwaarde <code>0</code> mee, dan werkt een leeg mandje ook.</p></div></details>
+  <details><summary>Hint 3: "Unused '@ts-expect-error' directive"</summary><div class="inner"><p>Je <code>Status</code> is te ruim. Waarschijnlijk staat er <code>string</code>. Een literal union schrijf je met <code>|</code> tussen de teksten.</p></div></details>
+
+  <h2>Zelfcheck</h2>
+  <div class="quiz" data-answer="a" data-uitleg="Door de typeof-controle weet TypeScript dat x binnen de if een string is.">
+    <p class="q"><code>function f(x: string | number) { if (typeof x === "string") { /* hier */ } }</code> Welk type heeft x op "hier"?</p>
+    <div class="opts"><button class="opt" data-k="a">string</button><button class="opt" data-k="b">number</button><button class="opt" data-k="c">string | number</button></div><p class="fb"></p>
+  </div>
+  <div class="quiz" data-answer="b" data-uitleg="A | B betekent: óf A, óf B. Een waarde die alles van beide heeft, schrijf je als A &amp; B.">
+    <p class="q">Een waarde van type <code>A | B</code> moet alle velden van A én B hebben.</p>
+    <div class="opts"><button class="opt" data-k="a">Waar</button><button class="opt" data-k="b">Onwaar</button></div><p class="fb"></p>
+  </div>
+  <div class="quiz" data-answer="c" data-uitleg="Het discriminant is een gezamenlijk veld met een vaste tekst per variant. Daaraan ziet TypeScript welke variant je hebt.">
+    <p class="q">Wat is bij een discriminated union het "discriminant"?</p>
+    <div class="opts"><button class="opt" data-k="a">Het eerste veld van elk object</button><button class="opt" data-k="b">Een veld van type any</button><button class="opt" data-k="c">Een gezamenlijk veld met een vaste waarde per variant, zoals <code>soort</code></button></div><p class="fb"></p>
+  </div>
+
+  <h2>Checkpoint</h2>
+  <div class="note ok"><p>Laat <code>[OK] week3:basis</code> zien en leg uit waarom <code>voegToe</code> een nieuwe array teruggeeft in plaats van <code>push</code> te gebruiken.</p></div>
+
+  <h2>Kom je er niet uit?</h2>
+  <ul class="docs">
+    <li><a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#union-types" target="_blank" rel="noopener"><b>Union types</b><span>Everyday Types</span></a></li>
+    <li><a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types" target="_blank" rel="noopener"><b>Literal types</b><span>Everyday Types</span></a></li>
+    <li><a href="https://www.typescriptlang.org/docs/handbook/2/narrowing.html" target="_blank" rel="noopener"><b>Narrowing</b><span>typeof, in, discriminated unions, never</span></a></li>
+    <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax" target="_blank" rel="noopener"><b>Spread syntax (...)</b><span>MDN: nieuwe array maken</span></a></li>
+    <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter" target="_blank" rel="noopener"><b>Array.filter</b><span>MDN</span></a></li>
+  </ul>
+</section>
+
+<!-- ============================ WEEK 4 ============================ -->
+<section class="page" id="week4">
+  <p class="eyebrow">Week 4</p>
+  <h1>Generics, modules en data van een API</h1>
+  <p class="lead">Je verdeelt je code over bestanden, haalt data op van een API en schrijft je eerste generieke functie.</p>
+  <div class="meta"><span class="chip">2 lesuren</span><span class="chip">Bestanden: week4/types.ts, api.ts, todos.ts, hulp.ts</span><span class="chip">Test: npm run test:week4</span></div>
+
+  <h2>Leerdoelen</h2>
+  <ul>
+    <li>Ik verdeel code over bestanden met <code>import</code> en <code>export</code>.</li>
+    <li>Ik gebruik <code>async</code>/<code>await</code> en <code>fetch</code>, en geef het antwoord van een API een type.</li>
+    <li>Ik schrijf een eenvoudige generic, zoals <code>function eerste&lt;T&gt;(lijst: T[])</code>.</li>
+  </ul>
+
+  <h2>Uitleg</h2>
+  <h3>Modules: import en export</h3>
+<pre><span class="c">// types.ts</span>
+<span class="k">export interface</span> <span class="t">Film</span> { titel: <span class="t">string</span>; jaar: <span class="t">number</span> }
+
+<span class="c">// films.ts</span>
+<span class="k">import</span> { <span class="t">Film</span> } <span class="k">from</span> <span class="s">"./types"</span>;   <span class="c">// accolades + exact dezelfde naam</span>
+<span class="k">export function</span> nieuwste(films: <span class="t">Film</span>[]): <span class="t">Film</span>[] { <span class="c">/* ... */</span> }</pre>
+  <h3>async, await en fetch</h3>
+  <p>Data ophalen duurt even. Een <code>async</code>-functie geeft daarom altijd een <code>Promise</code> terug: een belofte dat de waarde straks komt. Met <code>await</code> wacht je op die waarde.</p>
+<pre><span class="k">async function</span> haalFilmsOp(): <span class="t">Promise</span>&lt;<span class="t">Film</span>[]&gt; {
+  <span class="k">const</span> res = <span class="k">await</span> fetch(<span class="s">"https://voorbeeld.nl/films"</span>);
+  <span class="k">const</span> data = <span class="k">await</span> res.json();
+  <span class="k">return</span> data <span class="k">as</span> <span class="t">Film</span>[];   <span class="c">// jij vertelt TypeScript wat er binnenkomt</span>
+}</pre>
+  <div class="note warn"><p><b>Let op:</b> TypeScript controleert níet of de API echt een <code>Film[]</code> stuurt. Types bestaan alleen tijdens het compileren. Klopt je type niet met de echte data, dan merk je dat pas tijdens het draaien.</p></div>
+  <h3>Fouten afvangen</h3>
+<pre><span class="k">try</span> {
+  <span class="k">const</span> res = <span class="k">await</span> fetch(url);
+  <span class="k">if</span> (!res.ok) { <span class="c">/* bijv. 404 of 500: fetch gooit dan GEEN fout, controleer zelf */</span> }
+} <span class="k">catch</span> (e) {
+  <span class="c">// geen internet, ongeldige url ...</span>
+}</pre>
+  <h3>Generics: een functie voor elk type</h3>
+  <p>Een generic is een "type-variabele", meestal <code>T</code>. TypeScript vult zelf in wat <code>T</code> is, op basis van wat je meegeeft.</p>
+<pre><span class="k">function</span> laatste&lt;<span class="t">T</span>&gt;(lijst: <span class="t">T</span>[]): <span class="t">T</span> | <span class="t">undefined</span> {
+  <span class="k">return</span> lijst[lijst.length - <span class="s">1</span>];
+}
+<span class="k">const</span> a = laatste([<span class="s">"x"</span>, <span class="s">"y"</span>]);   <span class="c">// a: string | undefined</span>
+<span class="k">const</span> b = laatste([<span class="s">1</span>, <span class="s">2</span>, <span class="s">3</span>]);   <span class="c">// b: number | undefined</span></pre>
+
+  <h2>Stappenplan</h2>
+  <div class="progress" data-progress="week4"><span class="label">0/0</span><span class="track"><i></i></span></div>
+  <ol class="checklist" data-week="week4">
+    <li><label><input type="checkbox" data-id="w4-1"><span>Open <a href="https://jsonplaceholder.typicode.com/todos" target="_blank" rel="noopener">jsonplaceholder.typicode.com/todos</a> in je browser. Welke velden heeft één todo?</span></label></li>
+    <li><label><input type="checkbox" data-id="w4-2"><span>Maak in <code>week4/types.ts</code> de interface <code>Todo</code>.</span></label></li>
+    <li><label><input type="checkbox" data-id="w4-3"><span>Maak <code>haalTodosOp</code> in <code>api.ts</code> en <code>alleenAfgerond</code> in <code>todos.ts</code>.</span></label></li>
+    <li><label><input type="checkbox" data-id="w4-4"><span>Maak de generieke functie <code>eerste</code> in <code>hulp.ts</code>.</span></label></li>
+    <li><label><input type="checkbox" data-id="w4-5"><span>Test met <code>node check.js week4:basis</code>. Maak je inleverbestand met <code>npm run inleveren:week4</code> en lever het in via Canvas.</span></label></li>
+    <li><label><input type="checkbox" data-id="w4-6"><span>Zelfcheck en checkpoint.</span></label></li>
+  </ol>
+
+  <h2>Opdracht: API-verkenner</h2>
+  <div class="level">
+    <header><span class="tag basis">Basis</span><b>Todo's ophalen en filteren</b><code class="cmd">node check.js week4:basis</code></header>
+    <div class="body">
+      <div class="table-wrap"><table>
+        <tr><th>Bestand</th><th>Wat maak en exporteer je</th></tr>
+        <tr><td><code>types.ts</code></td><td><code>interface Todo</code> met <code>userId: number</code>, <code>id: number</code>, <code>title: string</code>, <code>completed: boolean</code></td></tr>
+        <tr><td><code>api.ts</code></td><td><code>haalTodosOp(): Promise&lt;Todo[]&gt;</code>: haalt <code>https://jsonplaceholder.typicode.com/todos</code> op en geeft de lijst terug</td></tr>
+        <tr><td><code>todos.ts</code></td><td><code>alleenAfgerond(todos: Todo[]): Todo[]</code>: alleen de todo's met <code>completed === true</code></td></tr>
+        <tr><td><code>hulp.ts</code></td><td><code>eerste&lt;T&gt;(lijst: T[]): T | undefined</code>: het eerste element, of <code>undefined</code> bij een lege lijst</td></tr>
+      </table></div>
+      <div class="note"><p>De test gebruikt <b>nep-data</b> in plaats van het echte internet. Je test werkt dus ook zonder wifi. Wil je het echte resultaat zien? Zet in <code>main.ts</code> je code in <code>async function main() { ... }</code>, roep onderaan <code>main();</code> aan en draai <code>npx tsx week4/main.ts</code>.</p></div>
+    </div>
+  </div>
+  <div class="level">
+    <header><span class="tag verdieping">Verdieping</span><b>Veilig ophalen met een union</b><code class="cmd">node check.js week4:verdieping</code></header>
+    <div class="body">
+      <p>Exporteer in <code>types.ts</code>:</p>
+<pre><span class="k">export type</span> <span class="t">Resultaat</span> = { status: <span class="s">"ok"</span>; data: <span class="t">Todo</span>[] } | { status: <span class="s">"fout"</span>; melding: <span class="t">string</span> };</pre>
+      <p>Maak in <code>api.ts</code> een tweede functie <code>haalTodosOpVeilig(): Promise&lt;Resultaat&gt;</code>. Die geeft <code>status: "fout"</code> als <code>res.ok</code> false is én als <code>fetch</code> een fout gooit.</p>
+    </div>
+  </div>
+  <div class="level">
+    <header><span class="tag uitdaging">Uitdaging</span><b>Eén generieke fetch-functie</b></header>
+    <div class="body"><p>Schrijf <code>haalOp&lt;T&gt;(url: string): Promise&lt;T&gt;</code> en gebruik hem voor twee endpoints, bijv. <code>/todos</code> en <code>/users</code>. Niet getest.</p></div>
+  </div>
+
+  <h3>Hints</h3>
+  <details><summary>Hint 1: TS2305 "has no exported member"</summary><div class="inner"><p>Je bent <code>export</code> vergeten voor je interface of functie, of de naam is net anders dan in de tabel.</p></div></details>
+  <details><summary>Hint 2: haalTodosOp</summary><div class="inner"><p>Kijk naar <code>haalFilmsOp</code> in de uitleg. Het is bijna hetzelfde, alleen met een andere url en een ander type.</p></div></details>
+  <details><summary>Hint 3: eerste&lt;T&gt; geeft "Unused '@ts-expect-error'"</summary><div class="inner"><p>Je functie is niet echt generiek. Waarschijnlijk gebruik je <code>any</code>. Zet <code>&lt;T&gt;</code> achter de functienaam en gebruik <code>T</code> voor de parameter en het returntype.</p></div></details>
+
+  <h2>Zelfcheck</h2>
+  <div class="quiz" data-answer="b" data-uitleg="Een async-functie geeft altijd een Promise terug. Met await krijg je de waarde.">
+    <p class="q">Wat geeft <code>async function f(): Promise&lt;string&gt; { return "Sam"; }</code> terug?</p>
+    <div class="opts"><button class="opt" data-k="a">Direct de string "Sam"</button><button class="opt" data-k="b">Een Promise die een string oplevert</button><button class="opt" data-k="c">void</button></div><p class="fb"></p>
+  </div>
+  <div class="quiz" data-answer="a" data-uitleg="fetch geeft alleen een fout bij bijvoorbeeld een netwerkfout. Bij 404 of 500 is res.ok false.">
+    <p class="q">Wat doet <code>fetch</code> als de server antwoordt met 404?</p>
+    <div class="opts"><button class="opt" data-k="a">De Promise slaagt gewoon; je moet zelf res.ok controleren</button><button class="opt" data-k="b">fetch gooit altijd een fout</button><button class="opt" data-k="c">TypeScript geeft een compileerfout</button></div><p class="fb"></p>
+  </div>
+  <div class="quiz" data-answer="c" data-uitleg="TypeScript vult T zelf in op basis van het argument: hier wordt T een string.">
+    <p class="q"><code>const x = eerste(["a", "b"]);</code> Welk type heeft x?</p>
+    <div class="opts"><button class="opt" data-k="a">T</button><button class="opt" data-k="b">any</button><button class="opt" data-k="c">string | undefined</button></div><p class="fb"></p>
+  </div>
+
+  <h2>Checkpoint</h2>
+  <div class="note ok"><p>Laat <code>[OK] week4:basis</code> zien en leg uit waarom TypeScript tijdens het draaien niet controleert of de API-data klopt met jouw type.</p></div>
+
+  <h2>Kom je er niet uit?</h2>
+  <ul class="docs">
+    <li><a href="https://www.typescriptlang.org/docs/handbook/2/modules.html" target="_blank" rel="noopener"><b>Modules</b><span>import en export</span></a></li>
+    <li><a href="https://www.typescriptlang.org/docs/handbook/2/generics.html" target="_blank" rel="noopener"><b>Generics</b><span>Lees alleen het eerste deel</span></a></li>
+    <li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch" target="_blank" rel="noopener"><b>Using the Fetch API</b><span>MDN</span></a></li>
+    <li><a href="https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Async_JS/Promises" target="_blank" rel="noopener"><b>How to use promises</b><span>MDN: async en await uitgelegd</span></a></li>
+    <li><a href="https://www.typescriptlang.org/docs/handbook/utility-types.html" target="_blank" rel="noopener"><b>Utility Types</b><span>Partial, Pick, Omit</span></a></li>
+  </ul>
+</section>
+
+<!-- ============================ WEEK 5 ============================ -->
+<section class="page" id="week5">
+  <p class="eyebrow">Week 5</p>
+  <h1>Classes en OOP</h1>
+  <p class="lead">Je bundelt data en gedrag in een class, schermt gegevens af met <code>private</code> en bouwt verder met <code>extends</code> en <code>implements</code>.</p>
+  <div class="meta"><span class="chip">2 lesuren</span><span class="chip">Bestanden: week5/bankrekening.ts, vormen.ts</span><span class="chip">Test: npm run test:week5</span></div>
+
+  <h2>Leerdoelen</h2>
+  <ul>
+    <li>Ik maak een class met een constructor, properties en methodes.</li>
+    <li>Ik gebruik <code>private</code>, <code>protected</code> en <code>readonly</code> om data te beschermen.</li>
+    <li>Ik gooi een fout met <code>throw new Error(...)</code>.</li>
+    <li>Ik gebruik <code>extends</code> (overerving) en <code>implements</code> (een interface volgen).</li>
+  </ul>
+
+  <h2>Uitleg</h2>
+  <h3>Een class</h3>
+  <p>Een class is een bouwtekening voor objecten. Met <code>new</code> maak je een object; dan draait de <code>constructor</code>. Met <code>this</code> verwijs je naar het object zelf.</p>
+<pre><span class="k">class</span> <span class="t">Teller</span> {
+  <span class="k">readonly</span> naam: <span class="t">string</span>;      <span class="c">// alleen in de constructor te zetten</span>
+  <span class="k">private</span> stand: <span class="t">number</span>;      <span class="c">// van buitenaf niet te lezen of te wijzigen</span>
+
+  <span class="k">constructor</span>(naam: <span class="t">string</span>, start: <span class="t">number</span> = <span class="s">0</span>) {
+    <span class="k">this</span>.naam = naam;
+    <span class="k">this</span>.stand = start;
+  }
+
+  verhoog(stap: <span class="t">number</span>): <span class="t">void</span> {
+    <span class="k">if</span> (stap &lt;= <span class="s">0</span>) <span class="k">throw new</span> <span class="t">Error</span>(<span class="s">"Stap moet groter dan 0 zijn"</span>);
+    <span class="k">this</span>.stand += stap;
+  }
+
+  getStand(): <span class="t">number</span> {
+    <span class="k">return this</span>.stand;
+  }
+}
+
+<span class="k">const</span> t = <span class="k">new</span> <span class="t">Teller</span>(<span class="s">"bezoekers"</span>);
+t.verhoog(<span class="s">3</span>);
+t.getStand();   <span class="c">// 3</span>
+t.stand = <span class="s">99</span>;    <span class="c">// ❌ stand is private</span></pre>
+  <h3>Overerving met extends</h3>
+  <p>Een subclass krijgt alles van de ouder-class en kan iets toevoegen. Wil de subclass bij een veld van de ouder kunnen? Maak dat veld dan <code>protected</code> in plaats van <code>private</code>.</p>
+<pre><span class="k">class</span> <span class="t">Stappenteller</span> <span class="k">extends</span> <span class="t">Teller</span> {
+  verdubbel(): <span class="t">void</span> {
+    <span class="k">this</span>.verhoog(<span class="k">this</span>.getStand());   <span class="c">// methodes van Teller kun je gewoon gebruiken</span>
+  }
+}</pre>
+  <h3>implements: een interface volgen</h3>
+<pre><span class="k">interface</span> <span class="t">Dier</span> {
+  naam: <span class="t">string</span>;
+  geluid(): <span class="t">string</span>;
+}
+
+<span class="k">class</span> <span class="t">Kat</span> <span class="k">implements</span> <span class="t">Dier</span> {
+  naam = <span class="s">"kat"</span>;
+  geluid(): <span class="t">string</span> { <span class="k">return</span> <span class="s">"miauw"</span>; }
+}
+<span class="c">// Vergeet je geluid(), dan geeft TypeScript een fout.</span></pre>
+  <div class="note"><p><b>Korte schrijfwijze:</b> <code>constructor(private straal: number) {}</code> maakt in één keer een private property <code>straal</code> aan en vult hem.</p></div>
+
+  <h2>Stappenplan</h2>
+  <div class="progress" data-progress="week5"><span class="label">0/0</span><span class="track"><i></i></span></div>
+  <ol class="checklist" data-week="week5">
+    <li><label><input type="checkbox" data-id="w5-1"><span>Lees de uitleg en bouw de <code>Teller</code> na in de Playground. Probeer <code>t.stand</code> te wijzigen.</span></label></li>
+    <li><label><input type="checkbox" data-id="w5-2"><span>Open <code>week5/bankrekening.ts</code> en lees de eisen.</span></label></li>
+    <li><label><input type="checkbox" data-id="w5-3"><span>Maak de constructor, <code>getSaldo</code> en <code>storten</code>. Test tussendoor.</span></label></li>
+    <li><label><input type="checkbox" data-id="w5-4"><span>Maak <code>opnemen</code> tot <code>[OK] week5:basis</code>.</span></label></li>
+    <li><label><input type="checkbox" data-id="w5-5"><span>Maak je inleverbestand met <code>npm run inleveren:week5</code> en lever het in via Canvas.</span></label></li>
+    <li><label><input type="checkbox" data-id="w5-6"><span>Zelfcheck en checkpoint.</span></label></li>
+  </ol>
+
+  <h2>Opdracht: Bankrekening</h2>
+  <div class="level">
+    <header><span class="tag basis">Basis</span><b>class Bankrekening</b><code class="cmd">node check.js week5:basis</code></header>
+    <div class="body">
+      <div class="table-wrap"><table>
+        <tr><th>Onderdeel</th><th>Eis</th></tr>
+        <tr><td><code>constructor(eigenaar: string, beginsaldo: number = 0)</code></td><td>Zet eigenaar en saldo</td></tr>
+        <tr><td><code>readonly eigenaar: string</code></td><td>Na het aanmaken niet meer te wijzigen</td></tr>
+        <tr><td><code>saldo</code></td><td><code>private</code> of <code>protected</code>: van buitenaf niet te lezen of te wijzigen</td></tr>
+        <tr><td><code>getSaldo(): number</code></td><td>Geeft het saldo terug</td></tr>
+        <tr><td><code>storten(bedrag: number): void</code></td><td>Verhoogt het saldo. Gooit een <code>Error</code> als het bedrag 0 of lager is</td></tr>
+        <tr><td><code>opnemen(bedrag: number): boolean</code></td><td><code>false</code> (en saldo blijft gelijk) bij te weinig saldo, anders <code>true</code></td></tr>
+      </table></div>
+    </div>
+  </div>
+  <div class="level">
+    <header><span class="tag verdieping">Verdieping</span><b>Spaarrekening en vormen</b><code class="cmd">node check.js week5:verdieping</code></header>
+    <div class="body">
+      <ul>
+        <li>In <code>bankrekening.ts</code>: <code>class Spaarrekening extends Bankrekening</code> met <code>renteToevoegen(procent: number): void</code>. Het saldo wordt <code>saldo + saldo × procent / 100</code>.</li>
+        <li>In <code>vormen.ts</code>: <code>interface Vorm</code> met <code>naam: string</code> en <code>oppervlakte(): number</code>. Daarnaast <code>class Rechthoek implements Vorm</code> (constructor: breedte, hoogte; naam <code>"rechthoek"</code>) en <code>class Cirkel implements Vorm</code> (constructor: straal; naam <code>"cirkel"</code>; gebruik <code>Math.PI</code>).</li>
+        <li><code>totaleOppervlakte(vormen: Vorm[]): number</code>: de som van alle oppervlaktes.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="level">
+    <header><span class="tag uitdaging">Uitdaging</span><b>abstract class</b></header>
+    <div class="body"><p>Maak van <code>Vorm</code> een <code>abstract class</code> met een methode <code>beschrijving(): string</code> die bijvoorbeeld <code>"cirkel van 3.14 m²"</code> teruggeeft. Niet getest.</p></div>
+  </div>
+
+  <h3>Hints</h3>
+  <details><summary>Hint 1: een fout gooien</summary><div class="inner"><p>Controleer het bedrag als eerste regel van <code>storten</code>. Is het niet goed? Gebruik <code>throw new Error("...")</code>. De code daarna draait dan niet meer.</p></div></details>
+  <details><summary>Hint 2: Spaarrekening kan niet bij saldo</summary><div class="inner"><p>Een <code>private</code> veld is ook voor een subclass verboden. Maak <code>saldo</code> <code>protected</code>.</p></div></details>
+  <details><summary>Hint 3: "Unused '@ts-expect-error'" in week5.basis</summary><div class="inner"><p>De test probeert <code>saldo</code> en <code>eigenaar</code> van buitenaf te wijzigen. Dat moet een fout geven. Is <code>saldo</code> private/protected en <code>eigenaar</code> readonly?</p></div></details>
+
+  <h2>Zelfcheck</h2>
+  <div class="quiz" data-answer="a" data-uitleg="Beide zijn van buitenaf niet bereikbaar. Alleen protected mag in een subclass gebruikt worden.">
+    <p class="q">Wat is het verschil tussen <code>private</code> en <code>protected</code>?</p>
+    <div class="opts"><button class="opt" data-k="a">protected is ook bereikbaar in een subclass (extends), private niet</button><button class="opt" data-k="b">private is ook bereikbaar in een subclass, protected niet</button><button class="opt" data-k="c">protected is van buitenaf te wijzigen</button></div><p class="fb"></p>
+  </div>
+  <div class="quiz" data-answer="c" data-uitleg="Een interface bevat geen code. Met implements belooft de class dat hij alles heeft wat de interface vraagt, en TypeScript controleert dat.">
+    <p class="q">Wat doet <code>implements Vorm</code>?</p>
+    <div class="opts"><button class="opt" data-k="a">De class erft code van Vorm</button><button class="opt" data-k="b">De class wordt een interface</button><button class="opt" data-k="c">TypeScript controleert of de class alles heeft wat Vorm vraagt</button></div><p class="fb"></p>
+  </div>
+  <div class="quiz" data-answer="b" data-uitleg="Een abstract class is alleen een basis. Je maakt objecten van een subclass die alles invult.">
+    <p class="q">Van een <code>abstract class</code> kun je direct een object maken met <code>new</code>.</p>
+    <div class="opts"><button class="opt" data-k="a">Waar</button><button class="opt" data-k="b">Onwaar</button></div><p class="fb"></p>
+  </div>
+
+  <h2>Checkpoint</h2>
+  <div class="note ok"><p>Laat <code>[OK] week5:basis</code> zien en leg uit waarom <code>saldo</code> private is en wat er misgaat als iedereen het saldo zomaar kan aanpassen.</p></div>
+
+  <h2>Kom je er niet uit?</h2>
+  <ul class="docs">
+    <li><a href="https://www.typescriptlang.org/docs/handbook/2/classes.html" target="_blank" rel="noopener"><b>Classes</b><span>Constructor, private, readonly, extends, implements, abstract</span></a></li>
+    <li><a href="https://www.typescriptlang.org/docs/handbook/2/classes.html#member-visibility" target="_blank" rel="noopener"><b>Member Visibility</b><span>public, protected, private</span></a></li>
+    <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/throw" target="_blank" rel="noopener"><b>throw</b><span>MDN: een fout gooien</span></a></li>
+    <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/PI" target="_blank" rel="noopener"><b>Math.PI</b><span>MDN</span></a></li>
+  </ul>
+</section>
+
+<!-- ============================ WEEK 6 ============================ -->
+<section class="page" id="week6">
+  <p class="eyebrow">Week 6</p>
+  <h1>Eindproject: Bibliotheek</h1>
+  <p class="lead">Je combineert alles uit week 1–5 in een bibliotheek-systeem, breidt het uit met een eigen idee en laat het zien in een demo van 3 minuten.</p>
+  <div class="meta"><span class="chip">2 lesuren + thuis</span><span class="chip">Bestanden: week6/types.ts, bibliotheek.ts, main.ts</span><span class="chip">Test: npm run test:week6</span><span class="chip">Demo: npm run demo</span></div>
+
+  <h2>Leerdoelen</h2>
+  <ul>
+    <li>Ik combineer interfaces, unions, classes en async-code in één project.</li>
+    <li>Ik bedenk en bouw zelf een uitbreiding met eigen types.</li>
+    <li>Ik leg mijn ontwerpkeuzes uit in een korte demo.</li>
+  </ul>
+
+  <h2>Uitleg: zo zet je het project op</h2>
+  <p>Je hebt alles al eens gezien. Deze week gaat het om <b>combineren</b>:</p>
+  <div class="table-wrap"><table>
+    <tr><th>Wat</th><th>Uit week</th><th>Waar in het project</th></tr>
+    <tr><td>Literal union</td><td>3</td><td><code>type Genre = "roman" | "studie" | "strip"</code></td></tr>
+    <tr><td>Interface</td><td>2</td><td><code>interface Boek</code></td></tr>
+    <tr><td>Discriminated union</td><td>3, 4</td><td><code>type Resultaat</code> als antwoord van <code>leenUit</code></td></tr>
+    <tr><td>Class met private data</td><td>5</td><td><code>class Bibliotheek</code> met een <code>private</code> lijst boeken</td></tr>
+    <tr><td>Error gooien</td><td>5</td><td><code>voegToe</code> bij een dubbel isbn</td></tr>
+    <tr><td>async + fetch</td><td>4</td><td><code>laadBoeken</code> (verdieping)</td></tr>
+  </table></div>
+  <h3>Handige array-methodes</h3>
+<pre><span class="k">const</span> gevonden = boeken.find((b) => b.isbn === isbn);   <span class="c">// Boek | undefined: controleer eerst!</span>
+<span class="k">const</span> romans   = boeken.filter((b) => b.genre === <span class="s">"roman"</span>);
+<span class="k">const</span> match    = titel.toLowerCase().includes(term.toLowerCase());   <span class="c">// zoeken zonder hoofdletters</span></pre>
+  <h3>Een Resultaat teruggeven</h3>
+<pre><span class="k">function</span> deel(a: <span class="t">number</span>, b: <span class="t">number</span>): { ok: <span class="k">true</span>; uitkomst: <span class="t">number</span> } | { ok: <span class="k">false</span>; reden: <span class="t">string</span> } {
+  <span class="k">if</span> (b === <span class="s">0</span>) <span class="k">return</span> { ok: <span class="k">false</span>, reden: <span class="s">"Delen door 0 kan niet"</span> };
+  <span class="k">return</span> { ok: <span class="k">true</span>, uitkomst: a / b };
+}</pre>
+
+  <h2>Stappenplan</h2>
+  <div class="progress" data-progress="week6"><span class="label">0/0</span><span class="track"><i></i></span></div>
+  <ol class="checklist" data-week="week6">
+    <li><label><input type="checkbox" data-id="w6-1"><span>Lees de eisen in <code>week6/types.ts</code> en <code>week6/bibliotheek.ts</code>.</span></label></li>
+    <li><label><input type="checkbox" data-id="w6-2"><span>Maak eerst alle types in <code>types.ts</code>.</span></label></li>
+    <li><label><input type="checkbox" data-id="w6-3"><span>Bouw de class stap voor stap: <code>voegToe</code> en <code>aantal</code>, dan <code>zoek</code> en <code>perGenre</code>, dan <code>leenUit</code> en <code>brengTerug</code>. Test na elke stap.</span></label></li>
+    <li><label><input type="checkbox" data-id="w6-4"><span><code>[OK] week6:basis</code>? Kies en bouw je eigen uitbreiding.</span></label></li>
+    <li><label><input type="checkbox" data-id="w6-5"><span>Vul <code>main.ts</code> met een demo en probeer <code>npm run demo</code>.</span></label></li>
+    <li><label><input type="checkbox" data-id="w6-6"><span>Schrijf een README: wat doet je project, welke uitbreiding heb je gemaakt, hoe start je de demo?</span></label></li>
+    <li><label><input type="checkbox" data-id="w6-7"><span>Maak je inleverbestand met <code>npm run inleveren:week6</code> en lever het in via Canvas. Oefen je demo van 3 minuten.</span></label></li>
+  </ol>
+
+  <h2>Opdracht: Bibliotheek-systeem</h2>
+  <div class="level">
+    <header><span class="tag basis">Basis</span><b>Types en class Bibliotheek</b><code class="cmd">node check.js week6:basis</code></header>
+    <div class="body">
+<pre><span class="c">// week6/types.ts</span>
+<span class="k">export type</span> <span class="t">Genre</span> = <span class="s">"roman"</span> | <span class="s">"studie"</span> | <span class="s">"strip"</span>;
+<span class="k">export interface</span> <span class="t">Boek</span> { isbn: <span class="t">string</span>; titel: <span class="t">string</span>; auteur: <span class="t">string</span>; genre: <span class="t">Genre</span>; uitgeleend: <span class="t">boolean</span> }
+<span class="k">export type</span> <span class="t">Resultaat</span> = { ok: <span class="k">true</span> } | { ok: <span class="k">false</span>; reden: <span class="t">string</span> };</pre>
+      <div class="table-wrap"><table>
+        <tr><th>Methode van <code>Bibliotheek</code></th><th>Moet doen</th></tr>
+        <tr><td><code>voegToe(boek: Boek): void</code></td><td>Boek toevoegen. <code>Error</code> als het isbn al bestaat</td></tr>
+        <tr><td><code>aantal(): number</code></td><td>Hoeveel boeken er zijn</td></tr>
+        <tr><td><code>zoek(term: string): Boek[]</code></td><td>Boeken waarvan titel <b>of</b> auteur de term bevat, hoofdletters maken niet uit</td></tr>
+        <tr><td><code>perGenre(genre: Genre): Boek[]</code></td><td>Alle boeken van dat genre</td></tr>
+        <tr><td><code>leenUit(isbn: string): Resultaat</code></td><td><code>{ ok: true }</code> en <code>uitgeleend = true</code>. Bestaat het boek niet of is het al uitgeleend: <code>{ ok: false, reden }</code></td></tr>
+        <tr><td><code>brengTerug(isbn: string): Resultaat</code></td><td><code>{ ok: true }</code> en <code>uitgeleend = false</code>. Bestaat het boek niet of was het niet uitgeleend: <code>{ ok: false, reden }</code></td></tr>
+      </table></div>
+    </div>
+  </div>
+  <div class="level">
+    <header><span class="tag verdieping">Verdieping</span><b>Boeken laden van een API</b><code class="cmd">node check.js week6:verdieping</code></header>
+    <div class="body"><p>Voeg aan <code>Bibliotheek</code> toe: <code>laadBoeken(url: string): Promise&lt;number&gt;</code>. De methode haalt met <code>fetch</code> een <code>Boek[]</code> op, voegt alle boeken toe die er nog niet zijn en geeft terug hoeveel er zijn toegevoegd. Bij een fout (<code>res.ok</code> is false of <code>fetch</code> gooit) geeft hij <code>0</code>.</p></div>
+  </div>
+  <div class="level">
+    <header><span class="tag uitdaging">Eigen uitbreiding</span><b>Verplicht voor de rubric, niet getest</b></header>
+    <div class="body">
+      <p>Bedenk minstens één eigen uitbreiding met eigen types. Ideeën:</p>
+      <ul>
+        <li><b>Leden:</b> een <code>interface Lid</code>, en een lid mag maximaal 3 boeken tegelijk lenen.</li>
+        <li><b>Uitleengeschiedenis:</b> sla per uitlening de datum en het lid op, en toon de populairste boeken.</li>
+        <li><b>Boetes:</b> een inleverdatum en een boete per dag te laat.</li>
+        <li><b>Generieke opslag:</b> een <code>class Opslag&lt;T&gt;</code> die je voor boeken én leden gebruikt.</li>
+        <li><b>Statistieken:</b> een <code>Record&lt;Genre, number&gt;</code> met het aantal boeken per genre.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Hints</h3>
+  <details><summary>Hint 1: waar bewaar ik de boeken?</summary><div class="inner"><p>Geef de class een <code>private</code> property met een lege lijst: <code>private boeken: Boek[] = [];</code>. Alle methodes werken met <code>this.boeken</code>.</p></div></details>
+  <details><summary>Hint 2: steeds hetzelfde boek zoeken</summary><div class="inner"><p>Je zoekt in <code>voegToe</code>, <code>leenUit</code> en <code>brengTerug</code> steeds een boek op isbn. Maak daar één <code>private</code> hulpmethode voor die <code>Boek | undefined</code> teruggeeft.</p></div></details>
+  <details><summary>Hint 3: laadBoeken</summary><div class="inner"><p>Combineer <code>haalTodosOpVeilig</code> uit week 4 met je eigen <code>voegToe</code>. Let op: <code>voegToe</code> gooit een fout bij een dubbel isbn. Controleer dus eerst of het boek er al is.</p></div></details>
+
+  <h2>Beoordeling (rubric)</h2>
+  <p>De eindopdracht telt voor <b>20%</b> van je <a href="#cijfer">eindcijfer</a>. 5 criteria × 0–2 punten, maximaal 10. Een 6 of hoger is voldoende.</p>
+  <div class="table-wrap"><table>
+    <tr><th>Criterium</th><th>Onvoldoende (0)</th><th>Voldoende (1)</th><th>Goed (2)</th></tr>
+    <tr><td>Types</td><td>Veel <code>any</code> of geen eigen types</td><td>Eigen interfaces en types voor alle data</td><td>Unions en/of generics zinvol ingezet</td></tr>
+    <tr><td>Structuur</td><td>Alles in één bestand, alles public</td><td>Types en class gescheiden, data private</td><td>Logische opsplitsing, hulpmethodes, geen dubbele code</td></tr>
+    <tr><td>Werking</td><td><code>week6:basis</code> faalt</td><td><code>week6:basis</code> groen</td><td>Ook <code>week6:verdieping</code> groen</td></tr>
+    <tr><td>Eigen uitbreiding</td><td>Geen</td><td>Eén werkende uitbreiding</td><td>Uitbreiding met eigen types, zichtbaar in de demo</td></tr>
+    <tr><td>Demo &amp; uitleg</td><td>Kan de code niet uitleggen</td><td>Legt de eigen code uit</td><td>Legt keuzes en types helder uit</td></tr>
+  </table></div>
+
+  <h2>Zelfcheck</h2>
+  <div class="quiz" data-answer="a" data-uitleg="find geeft het eerste element dat klopt, of undefined als er niets is. Controleer daarom eerst of je iets gevonden hebt.">
+    <p class="q">Welk type heeft <code>boeken.find((b) =&gt; b.isbn === "1")</code>?</p>
+    <div class="opts"><button class="opt" data-k="a">Boek | undefined</button><button class="opt" data-k="b">Boek</button><button class="opt" data-k="c">Boek[]</button></div><p class="fb"></p>
+  </div>
+  <div class="quiz" data-answer="c" data-uitleg="Er kan van alles gegooid worden. Controleer eerst met e instanceof Error voordat je e.message gebruikt.">
+    <p class="q">Welk type heeft <code>e</code> in <code>catch (e)</code> als strict aan staat?</p>
+    <div class="opts"><button class="opt" data-k="a">Error</button><button class="opt" data-k="b">string</button><button class="opt" data-k="c">unknown</button></div><p class="fb"></p>
+  </div>
+  <div class="quiz" data-answer="b" data-uitleg="Met deze union kun je reden alleen gebruiken als ok false is. Zo vergeet je de foutafhandeling niet.">
+    <p class="q">Waarom geeft <code>leenUit</code> een <code>Resultaat</code>-union terug?</p>
+    <div class="opts"><button class="opt" data-k="a">Het maakt de code sneller</button><button class="opt" data-k="b">De aanroeper moet ok controleren en krijgt bij een fout de reden</button><button class="opt" data-k="c">Er kan dan nooit iets misgaan</button></div><p class="fb"></p>
+  </div>
+
+  <h2>Demo (3 minuten)</h2>
+  <div class="note ok"><p>Draai <code>npm run demo</code> en laat zien: 1) je bibliotheek in actie, 2) je eigen uitbreiding, 3) één plek waar een type je tegen een fout beschermt. Je docent stelt daarna één vraag over je code.</p></div>
+
+  <h2>Kom je er niet uit?</h2>
+  <ul class="docs">
+    <li><a href="https://www.typescriptlang.org/docs/handbook/2/classes.html" target="_blank" rel="noopener"><b>Classes</b><span>Herhaling week 5</span></a></li>
+    <li><a href="https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions" target="_blank" rel="noopener"><b>Discriminated unions</b><span>Voor Resultaat</span></a></li>
+    <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find" target="_blank" rel="noopener"><b>Array.find</b><span>MDN</span></a></li>
+    <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/includes" target="_blank" rel="noopener"><b>String.includes</b><span>MDN: zoeken in tekst</span></a></li>
+    <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/try...catch" target="_blank" rel="noopener"><b>try...catch</b><span>MDN</span></a></li>
+    <li><a href="https://www.typescriptlang.org/docs/handbook/utility-types.html#recordkeys-type" target="_blank" rel="noopener"><b>Record&lt;K, V&gt;</b><span>Voor statistieken per genre</span></a></li>
+  </ul>
+</section>
+
+<!-- ============================ HULP ============================ -->
+<section class="page" id="hulp">
+  <p class="eyebrow">Hulp</p>
+  <h1>Foutmeldingen &amp; hulp</h1>
+  <p class="lead">De meeste fouten komen steeds terug. Zoek de code (bijv. <code>TS2305</code>) op in deze lijst.</p>
+
+  <h2>TypeScript-foutmeldingen</h2>
+  <div class="table-wrap"><table>
+    <tr><th>Melding</th><th>Wat betekent het?</th><th>Wat doe je?</th></tr>
+    <tr><td><code>TS2305</code> has no exported member 'X'</td><td>De test kan X niet vinden in jouw bestand.</td><td>Zet <code>export</code> ervoor en controleer de spelling van de naam.</td></tr>
+    <tr><td><code>TS7006</code> Parameter 'x' implicitly has an 'any' type</td><td>Een parameter heeft geen type.</td><td>Geef hem een type: <code>x: number</code>.</td></tr>
+    <tr><td><code>TS2322</code> Type 'A' is not assignable to type 'B'</td><td>Je stopt een waarde van het verkeerde type ergens in.</td><td>Kijk welk type verwacht wordt (B) en wat je geeft (A).</td></tr>
+    <tr><td><code>TS2345</code> Argument of type 'A' is not assignable to parameter of type 'B'</td><td>Je roept een functie aan met het verkeerde type.</td><td>Controleer wat je meegeeft.</td></tr>
+    <tr><td><code>TS2339</code> Property 'x' does not exist on type 'Y'</td><td>Het veld bestaat niet, of er zit een tikfout in.</td><td>Controleer de naam, of controleer eerst welke variant van een union je hebt.</td></tr>
+    <tr><td><code>TS2741</code> Property 'x' is missing in type ...</td><td>Een verplicht veld ontbreekt in je object.</td><td>Voeg het veld toe, of maak het optioneel met <code>?</code>.</td></tr>
+    <tr><td><code>TS7030</code> Not all code paths return a value</td><td>Je functie geeft in sommige gevallen niets terug.</td><td>Zorg dat elke route een <code>return</code> heeft.</td></tr>
+    <tr><td><code>TS18048</code> 'x' is possibly 'undefined'</td><td>De waarde kan undefined zijn (bijv. na <code>find</code>).</td><td>Controleer eerst met <code>if (x)</code> of gebruik <code>?.</code>.</td></tr>
+    <tr><td><code>TS2578</code> Unused '@ts-expect-error' directive</td><td>De test verwachtte een fout, maar jouw type laat het toe. Je type is te ruim.</td><td>Lees het commentaar boven die regel in het testbestand. Vaak: geen <code>any</code>/<code>string</code>, maar een literal union, <code>readonly</code> of <code>private</code>.</td></tr>
+  </table></div>
+
+  <h2>Test-uitslagen lezen</h2>
+  <div class="grid">
+    <div class="card"><h3>TypeScript-fouten gevonden</h3><p>Je code compileert niet. Los eerst de fouten met <code>error TS....</code> op, van boven naar beneden.</p></div>
+    <div class="card"><h3>✖ bij een test</h3><p>Je code compileert, maar de uitkomst klopt niet. Kijk naar <code>expected</code> (wat moest) en <code>actual</code> (wat jij gaf).</p></div>
+    <div class="card"><h3>bestand ontbreekt</h3><p>Een bestand is verplaatst of hernoemd. Zet het terug op de plek uit de opdracht.</p></div>
+  </div>
+
+  <h2>Andere problemen</h2>
+  <div class="table-wrap"><table>
+    <tr><th>Probleem</th><th>Oplossing</th></tr>
+    <tr><td><code>npm</code> of <code>node</code> wordt niet herkend</td><td>Installeer Node.js en <b>herstart VS Code</b>.</td></tr>
+    <tr><td>TypeScript is niet geïnstalleerd</td><td>Voer <code>npm install</code> uit in de hoofdmap van je project.</td></tr>
+    <tr><td>In mijn inleverbestand ontbreekt code</td><td>Staat je code in de juiste map (bijv. <code>week2/</code>) en heb je het bestand opgeslagen? Maak het inleverbestand daarna opnieuw.</td></tr>
+    <tr><td><code>npm run inleveren:week2</code> wordt niet herkend</td><td>Staat je terminal in de hoofdmap van het project (waar <code>package.json</code> staat)?</td></tr>
+    <tr><td><code>git push</code> naar GitLab wordt geweigerd</td><td>Voer eerst <code>git pull</code> uit en daarna opnieuw <code>git push</code>.</td></tr>
+    <tr><td>Ik kan niets installeren op mijn laptop</td><td>Oefen de uitleg in de <a href="https://www.typescriptlang.org/play" target="_blank" rel="noopener">TS Playground</a> en meld het bij je docent.</td></tr>
+  </table></div>
+
+  <h2>Altijd handig</h2>
+  <ul class="docs">
+    <li><a href="https://www.typescriptlang.org/docs/handbook/intro.html" target="_blank" rel="noopener"><b>TypeScript Handbook</b><span>De officiële handleiding</span></a></li>
+    <li><a href="https://www.typescriptlang.org/play" target="_blank" rel="noopener"><b>TS Playground</b><span>Code proberen in de browser</span></a></li>
+    <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank" rel="noopener"><b>MDN JavaScript</b><span>Alles over arrays, strings en meer</span></a></li>
+    <li><a href="https://exercism.org/tracks/typescript" target="_blank" rel="noopener"><b>Exercism: TypeScript</b><span>Extra oefeningen met feedback</span></a></li>
+    <li><a href="https://github.com/type-challenges/type-challenges" target="_blank" rel="noopener"><b>Type Challenges</b><span>Uitdaging voor snelle studenten</span></a></li>
+  </ul>
+</section>
+
+<!-- ============================ TOETS ============================ -->
+<section class="page" id="toets">
+  <p class="eyebrow">Afsluiting</p>
+  <h1>Theorietoets</h1>
+  <p class="lead">Aan het eind maak je in Canvas een theorietoets over alle 6 weken. De toets telt voor <b>50%</b> van je <a href="#cijfer">eindcijfer</a>.</p>
+  <div class="table-wrap"><table>
+    <tr><th>Onderdeel</th><th>Info</th></tr>
+    <tr><td>Vragen</td><td>35 vragen, willekeurig gekozen uit een vragenbank per week: 6 vragen over week 1 t/m 5, en 5 over week 6</td></tr>
+    <tr><td>Soort</td><td>Meerkeuze en waar/onwaar. Ongeveer de helft is een codevraag: "wat zegt TypeScript bij deze code?"</td></tr>
+    <tr><td>Tijd</td><td>45 minuten</td></tr>
+    <tr><td>Voldoende</td><td>21 van de 35 goed (60%)</td></tr>
+  </table></div>
+  <h2>Zo bereid je je voor</h2>
+  <ol class="checklist" data-week="toets">
+    <li><label><input type="checkbox" data-id="t-1"><span>Maak de zelfcheck van elke week opnieuw. Weet je waarom het goede antwoord goed is?</span></label></li>
+    <li><label><input type="checkbox" data-id="t-2"><span>Lees de leerdoelen per week. Kun je elk leerdoel uitleggen met een klein codevoorbeeld?</span></label></li>
+    <li><label><input type="checkbox" data-id="t-3"><span>Neem de tabel met foutmeldingen bij <a href="#hulp">Hulp</a> door. Veel vragen gaan over wat TypeScript meldt.</span></label></li>
+    <li><label><input type="checkbox" data-id="t-4"><span>Probeer codevoorbeelden in de Playground: voorspel eerst de fout en kijk dan of je gelijk had.</span></label></li>
+  </ol>
+</section>
+
+<nav class="pager" id="pager"></nav>
+</main>
+
+<script>
+// ===== DOCENT: pas deze link aan naar de starter-zip in Canvas =====
+const STARTER_URL = "https://JOUW-SCHOOL.instructure.com/courses/CURSUS-ID/files";
+// ==============================================================
+
+const PAGES = ["home", "setup", "week1", "week2", "week3", "week4", "week5", "week6", "hulp", "toets"];
+const TITELS = { home: "Start hier", setup: "Installatie & inleveren", week1: "Week 1 · Basistypes", week2: "Week 2 · Functies & objecten", week3: "Week 3 · Unions & narrowing", week4: "Week 4 · Generics & API", week5: "Week 5 · Classes & OOP", week6: "Week 6 · Eindproject", hulp: "Foutmeldingen & hulp", toets: "Theorietoets" };
+const OPSLAG = "ts-course-voortgang";
+
+function lees() { try { return JSON.parse(localStorage.getItem(OPSLAG) || "{}"); } catch { return {}; } }
+function schrijf(v) { try { localStorage.setItem(OPSLAG, JSON.stringify(v)); } catch {} }
+let voortgang = lees();
+
+document.querySelectorAll("[data-starter-link]").forEach((a) => (a.href = STARTER_URL));
+
+// Routing
+function toon() {
+  const id = (location.hash || "#home").slice(1);
+  const pagina = PAGES.includes(id) ? id : "home";
+  document.querySelectorAll(".page").forEach((p) => p.classList.toggle("show", p.id === pagina));
+  document.querySelectorAll(".nav a").forEach((a) => a.classList.toggle("active", a.dataset.page === pagina));
+  document.title = TITELS[pagina] + " · TypeScript in 6 weken";
+  const i = PAGES.indexOf(pagina);
+  const pager = document.getElementById("pager");
+  const vorige = i > 0 ? `<a href="#${PAGES[i - 1]}"><small>← Vorige</small>${TITELS[PAGES[i - 1]]}</a>` : "<span></span>";
+  const volgende = i < PAGES.length - 1 ? `<a href="#${PAGES[i + 1]}" style="text-align:right"><small>Volgende →</small>${TITELS[PAGES[i + 1]]}</a>` : "<span></span>";
+  pager.innerHTML = vorige + volgende;
+  document.body.classList.remove("menu-open");
+  window.scrollTo({ top: 0, behavior: "instant" });
+  requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "instant" }));
+}
+window.addEventListener("hashchange", toon);
+
+// Checklists en voortgang
+function updateVoortgang() {
+  document.querySelectorAll(".checklist[data-week]").forEach((lijst) => {
+    const week = lijst.dataset.week;
+    const boxes = lijst.querySelectorAll("input[type=checkbox]");
+    const klaar = [...boxes].filter((b) => b.checked).length;
+    const pct = boxes.length ? Math.round((klaar / boxes.length) * 100) : 0;
+    const balk = document.querySelector(`[data-progress="${week}"]`);
+    if (balk) {
+      balk.querySelector(".label").textContent = `${klaar}/${boxes.length} stappen`;
+      balk.querySelector(".track i").style.width = pct + "%";
+    }
+    const link = document.querySelector(`.nav a[data-page="${week}"]`);
+    if (link) {
+      const i = link.querySelector(".bar i");
+      if (i) i.style.width = pct + "%";
+      link.classList.toggle("done", pct === 100);
+    }
+  });
+}
+document.querySelectorAll(".checklist input[type=checkbox]").forEach((box) => {
+  box.checked = !!voortgang[box.dataset.id];
+  box.addEventListener("change", () => {
+    voortgang[box.dataset.id] = box.checked;
+    schrijf(voortgang);
+    updateVoortgang();
+  });
+});
+document.getElementById("resetBtn").addEventListener("click", () => {
+  if (!confirm("Alle vinkjes wissen?")) return;
+  voortgang = {};
+  schrijf(voortgang);
+  document.querySelectorAll(".checklist input").forEach((b) => (b.checked = false));
+  updateVoortgang();
+});
+
+// Quiz
+document.querySelectorAll(".quiz").forEach((quiz) => {
+  const fb = quiz.querySelector(".fb");
+  quiz.querySelectorAll("button.opt").forEach((knop) => {
+    knop.addEventListener("click", () => {
+      const goed = knop.dataset.k === quiz.dataset.answer;
+      quiz.querySelectorAll("button.opt").forEach((b) => {
+        b.disabled = true;
+        if (b.dataset.k === quiz.dataset.answer) b.classList.add("right");
+      });
+      if (!goed) knop.classList.add("wrong");
+      fb.innerHTML = `<b>${goed ? "Goed!" : "Niet helemaal."}</b> ${quiz.dataset.uitleg}`;
+      fb.classList.add("show");
+    });
+  });
+  const opnieuw = document.createElement("button");
+  opnieuw.className = "btn";
+  opnieuw.style.marginTop = "10px";
+  opnieuw.textContent = "Opnieuw";
+  opnieuw.addEventListener("click", () => {
+    quiz.querySelectorAll("button.opt").forEach((b) => { b.disabled = false; b.classList.remove("right", "wrong"); });
+    fb.classList.remove("show");
+  });
+  quiz.appendChild(opnieuw);
+});
+
+// Kopieerknoppen bij commando's
+document.querySelectorAll("pre.copy").forEach((pre) => {
+  const knop = document.createElement("button");
+  knop.className = "copy-btn";
+  knop.textContent = "Kopieer";
+  knop.addEventListener("click", async () => {
+    const tekst = pre.innerText.replace(/\s*Kopieer$/, "").replace(/\s+#.*$/gm, "");
+    try { await navigator.clipboard.writeText(tekst); knop.textContent = "Gekopieerd"; }
+    catch { knop.textContent = "Selecteer zelf"; }
+    setTimeout(() => (knop.textContent = "Kopieer"), 1500);
+  });
+  pre.appendChild(knop);
+});
+
+// Thema
+const root = document.documentElement;
+try { const t = localStorage.getItem("ts-course-thema"); if (t) root.dataset.theme = t; } catch {}
+document.getElementById("themeBtn").addEventListener("click", () => {
+  const donker = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  root.dataset.theme = donker ? "light" : "dark";
+  try { localStorage.setItem("ts-course-thema", root.dataset.theme); } catch {}
+});
+
+// Mobiel menu
+document.getElementById("menuBtn").addEventListener("click", () => document.body.classList.toggle("menu-open"));
+document.getElementById("overlay").addEventListener("click", () => document.body.classList.remove("menu-open"));
+
+updateVoortgang();
+toon();
+</script>
+</body>
+</html>
